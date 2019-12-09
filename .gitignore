@@ -1,0 +1,26 @@
+getMoney.fif.bak
+new-testgiverEdited.fif
+new-testgiver.addr
+new-testgiver-query.boc
+testgiver-query.boc
+random.fc
+.idea
+logs.txt
+# getMoney.fif
+outputFileWithFiftAsm.fc
+outputFileWithFiftAsm.fif
+new-wallet-query.boc
+new-wallet.addr
+new-wallet.pk
+in.fifo
+out.fifo
+wallet_query.boc
+bin
+result.fif
+main
+pool-query.boc
+pool.addr
+bob.pk
+bob.addr
+alice.pk
+alice.addr

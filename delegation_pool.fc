@@ -1,0 +1,7 @@
+() recv_internal() impure {}
+
+delegate(cell delegation_data) {
+
+}
+
+
