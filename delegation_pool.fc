@@ -1,7 +1,26 @@
-() recv_internal() impure {}
+() recv_internal() impure {
+   var isValidSignature = check_signature(in_msg, signature);
 
-delegate(cell delegation_data) {
+   if (isValidSignature) {
+       
+   }
+   else {
+       ;; return error ?
+   }
+}
 
+
+;; delegate - allows to send GRAMs to the pool
+;; your GRAMs will be freezed during elections and validation period
+;; if delegated person will become validator
+;; else you can withdraw your funds after elections
+;; 
+;; election_id - uint 32
+;; validator_public_key - uint 256
+;; delegator_public_key - uint 256
+
+delegate(uint election_id, uint validator_public_key, uint delegator_public_key) {
+    
 }
 
 
