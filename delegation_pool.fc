@@ -18,9 +18,10 @@
 ;; election_id - uint 32
 ;; validator_public_key - uint 256
 ;; delegator_public_key - uint 256
-
-delegate(uint election_id, uint validator_public_key, uint delegator_public_key) {
-    
+delegate(uint election_id, uint validator_public_key, uint delegator_public_key, uint grams) {
+    throw_unless(1, election_id == get_election_id());
+    throw_unless(2, validator_public_key == get_validator_public_key());
+    save_delegator(delegator_public_key, grams);
 }
 
 
