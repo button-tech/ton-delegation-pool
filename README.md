@@ -1,5 +1,6 @@
-# Answer on Telegram Contest Questions
-1) Describes your project and how users will interact with it 
+# TON Delegation Pool platform
+## Answers on Telegram Contest Key points
+#### Describes your project and how users will interact with it 
 
 This project allows anyone to create delegation pool and become validator. Also it allows anyone to earn interest by delegating Grams to potential Validators. (Risks will be handled by reputation system and security deposits). It is non-custodial solution, it is web based solution (all private keys and operations with it are on client side). 
  It is WEB platform features like:
@@ -8,7 +9,7 @@ This project allows anyone to create delegation pool and become validator. Also 
 
 Users will interact with it in two ways. Delegators will just use web based platform or any compatible wallet. They just need to find a delegation pool and send funds to it. They can track statuses of pool via Web platform or can subscribe to the bot notification. Validators can deploy delegation pool via WEB platform. However, to ensure that everything is ok, they will need to use terminal to sign all neccesary data to stake funds from delegation pool to elector pool.
 
-2) Explains how your code should be used to deploy and use your smart contract.
+#### Explains how your code should be used to deploy and use your smart contract.
 
 
 THE BEST WAY to run everything locally is use docker compose
