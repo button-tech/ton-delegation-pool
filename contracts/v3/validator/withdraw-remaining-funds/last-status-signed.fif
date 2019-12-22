@@ -1,0 +1,34 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+
+{ ."usage: " @' $0 type ." <validator-public-key> <delegation-pool-address> <validator-signature> <withdrawal-amount> [<savefile>]" cr
+    ."Creates a request to withdraw grams from delegator_pool contract" cr 1 halt
+  ." (When validator allowed to withdrawal remaining funds)"
+} : usage
+$# dup 4 < swap 5 > or ' usage if
+
+true =: bounce
+
+$1 base64>B dup Blen 36 <> abort"validator Ed25519 public key must be exactly 36 bytes long"
+  32 B>u@+ 0xC6B41348 <> abort"invalid Ed25519 public key: unknown magic number"
+  constant pubkey
+$2 bounce parse-load-address =: bounce 2=: contract_address
+$3 base64>B dup Blen 64 <> abort"validator Ed25519 signature must be exactly 64 bytes long"
+constant signature
+$4 (number) =: amount
+def? $5 { @' $5 } { "msg-body" } cond constant output_fname
+
+
+pubkey contract_address swap drop 256 u>B B+ constant to_sign
+
+to_sign signature pubkey ed25519_chksign not abort"Ed25519 signature is invalid"
+."Provided a valid Ed25519 signature " signature Bx. ." with validator public key " pubkey Bx. cr
+
+contract_address swap drop
+<b x{68526213} s, amount Gram, pubkey B, swap 256 u, 
+  <b signature B, b> ref,
+b>
+
+cr ."Message body is " dup <s csr. cr
+
+2 boc+>B output_fname +".boc" tuck B>file ."Saved to file " type cr

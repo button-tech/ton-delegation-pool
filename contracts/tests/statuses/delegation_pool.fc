@@ -1,0 +1,140 @@
+;; elected_for elections_begin_before elections_end_before stake_held_for
+(int, int, int, int) get_validator_conf() {
+  return (65536, 32768, 8192, 32768);
+}
+
+;; min_stake max_stake min_total_stake max_stake_factor
+(int, int, int, int) get_stake_conf() {
+    return (10000000000000, 10000000000000000, 500000000000000, 655360);
+}
+
+_ ~credit_to(credits, addr, amount) {
+  var (val, f) = credits.udict_get?(256, addr);
+  if (f) {
+    amount += val~load_grams();
+  }
+  credits~udict_set_builder(256, addr, begin_cell().store_grams(amount));
+  return (credits, ());
+}
+
+_ ~set_stake(delegators, pub, address, amount) {
+  if (dict_empty?(delegators)) {
+      delegators~udict_set_builder(256, pub, begin_cell().store_grams(amount).store_uint(address, 256));
+      return (delegators, ());
+  }
+  var (d, f) = delegators.udict_get?(256, pub);
+  if (f) {
+    amount += d~load_grams();
+    throw_unless(409, address == d~load_uint(256));
+  }
+  delegators~udict_set_builder(256, pub, begin_cell().store_grams(amount).store_uint(address, 256));
+  return (delegators, ());
+}
+
+;; expensive operation, may be possible to fix it
+int contain(cell dict, int validator_public_key) {
+    int id = -1;
+    int isExist = false;
+    do {
+        (id, var fs, var f) = dict.udict_get_next?(16, id);
+        if (f) {
+            var pub = fs.skip_bits(8 + 32).preload_uint(256);
+            if (pub == validator_public_key) {
+              isExist = true;
+            }
+        }
+    } until (~ f);
+    return isExist;
+}
+
+(int) allow_withdrawal(int contract_status, int deadline, int validator_public_key, int current_time) {
+    var (validators_elected_for, _, _, _) = get_stake_conf();
+
+    var cur_vset_deadline = deadline + validators_elected_for;
+    var prev_vset_deadline = cur_vset_deadline + validators_elected_for;
+
+    if (current_time > prev_vset_deadline) {
+        ;; assumption
+        ;; if stake_held_for > validation_close * 2 than allow to try to withraw
+        return true;
+    }
+
+    if (current_time > cur_vset_deadline) {
+        var prev_vset = config_param(32); ;; previous validator set
+        throw_if(90, prev_vset.null?());
+
+        var validators = prev_vset.begin_parse().skip_bits(8 + 32 + 32 + 16 + 16 + 64).preload_dict();
+        return validators.contain(validator_public_key) ? false : true;
+    }
+
+    var cur_vset = config_param(34); ;; current validator set
+    throw_if(91, cur_vset.null?());
+
+    var validators = cur_vset.begin_parse().skip_bits(8 + 32 + 32 + 16 + 16 + 64).preload_dict();
+    return validators.contain(validator_public_key) ? false : true;
+}
+
+_ ~update_status(ds, current_time) {
+    var (contract_status, deadline) = (ds~load_uint(4), ds~load_uint(32));
+    var ds_copy = ds;
+
+    if (current_time <= deadline) {
+        return (ds, (contract_status, deadline));
+    }
+    
+    contract_status += contract_status;
+
+    ;; deposit deadline is over
+    ;; validator can provide data and total_stake from this contract
+    if (contract_status == 0x2) {
+        var validators_elected_for = 65536;
+        ;; validator should deposit during 5 elections time frame
+        deadline += (validators_elected_for * 5);
+        if (current_time > deadline) {
+            contract_status += contract_status;
+        }
+    }
+
+    ;; validator didn't have time to stake during
+    if (contract_status == 0x4) {
+        ;; after that time validator will be able to withdraw the remaining funds
+        deadline += (3600 * 24 * 30 * 2); ;; 2 month
+        if (current_time > deadline) {
+            contract_status += contract_status;
+        }
+    }
+
+    ;; at this stage we need to check are we in validator list
+    ;; if yes let's wait `validators_elected_for` - validator period delta since start of validation
+    ;; and `stake_held_for` - delta to withdrawal stake from elector contract
+    ;; else move to withdrawal funds without bonuses from elector contract (allowed for each participant)
+    if (contract_status == 0x6) {
+        ds_copy~load_grams(); ;; skip grams
+        var validator_public_key = ds_copy~load_uint(256);
+        if (allow_withdrawal(contract_status, deadline, validator_public_key, current_time)) {
+            ;; wait unlimit time while someone will trigger recover_stake from elector contract
+            contract_status = 0x5; 
+            deadline = 0xFFFFFFFF;
+        } 
+    }
+
+    ;; validator can withdrawal the remaining funds
+    if ((contract_status == 0x8) | (contract_status == 0xE)) {
+        deadline = 0xFFFFFFFF;
+    }
+
+    return (ds, (contract_status, deadline));
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    var test_current_time = in_msg~load_uint(32);
+
+    var ds = get_data().begin_parse();
+    var ( contract_status, deadline ) = ds~update_status(test_current_time);
+
+    set_data(begin_cell()
+        .store_uint(contract_status, 4)
+        .store_uint(deadline, 32)
+        .end_cell());
+}

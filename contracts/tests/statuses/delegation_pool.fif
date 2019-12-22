@@ -1,0 +1,40 @@
+"TonUtil.fif" include
+"Asm.fif" include
+{ { ."Yes " } { ."No " } cond } : ?.
+"outputFileWithFiftAsm.fif" constant asm_code-source
+
+PROGRAM{
+  asm_code-source include
+}END>c constant code
+
+"../../delegators/1/wallet.pk" load-generate-keypair
+constant validator-privk
+constant validator-pub
+
+1576527558 constant initial_time
+
+120 constant status_0x1_deadline_delta
+65536 5 * constant status_0x2_deadline_delta
+3600 24 30 2 * * * constant status_0x4_deadline_delta
+0xFFFFFFFF constant status_0xF_deadline
+
+<b 0x1 4 u, initial_time status_0x1_deadline_delta + 32 u, b> constant storage_0x1
+<b initial_time 32 u, b> constant body_0x1
+
+<b 0x1 4 u, initial_time status_0x1_deadline_delta + 32 u, b> constant storage_0x2
+<b initial_time status_0x1_deadline_delta status_0x2_deadline_delta + + 32 u, b> constant body_0x2
+
+<b 0x1 4 u, initial_time status_0x1_deadline_delta + 32 u, b> constant storage_0x4
+<b initial_time status_0x1_deadline_delta status_0x2_deadline_delta 500 + + + 32 u, b> constant body_0x4
+
+0 <b b> body_0x1 <s recv_internal code <s storage_0x1 runvm .s constant updated_storage_0x1 constant exit_code_0x1
+0 <b b> body_0x2 <s recv_internal code <s storage_0x2 runvm .s constant updated_storage_0x2 constant exit_code_0x2
+0 <b b> body_0x4 <s recv_internal code <s storage_0x4 runvm .s constant updated_storage_0x4 constant exit_code_0x4
+
+."Exit code 0x1: " exit_code_0x1 . cr
+."Exit code 0x2: " exit_code_0x2 . cr 
+."Exit code 0x4: " exit_code_0x4 . cr 
+cr
+."Should be 0x1: " updated_storage_0x1 <s 4 i@ 0x1 = ?. cr
+."Should be 0x2: " updated_storage_0x2 <s 4 i@ 0x2 = ?. cr
+."Should be 0x4: " updated_storage_0x4 <s 4 i@ 0x4 = ?. cr

@@ -1,0 +1,21 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+
+{ ."usage: " @' $0 type ." <path-to-wallet.pk> [<savefile>]" cr
+  ."Creates a request to delegate some amount of Grams to delegate_pool contract" cr 1 halt
+} : usage
+
+$# dup 1 < swap 2 > or ' usage if
+
+$1 =: file-base
+def? $2 { @' $2 } { "msg-body" } cond constant output_fname
+
+file-base +".pk" load-keypair
+constant wallet_priv
+constant wallet_pub
+
+<b x{543c1024} s, wallet_pub B, b>
+
+cr ."Message body is " dup <s csr. cr
+
+2 boc+>B output_fname +".boc" tuck B>file ."Saved to file " type cr

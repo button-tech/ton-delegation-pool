@@ -1,0 +1,644 @@
+;; Contract statuses
+;;  
+;;        |                |                                 |  Elections successfull   |  Unfreeze period  |  Contract closed
+;;        |                |                                 |                          |                   
+;; Setup  |  Raising Open  |  Waiting for elections results  |            OR            |
+;;        |                |                                 |                          |
+;;        |                |                                 |  Elections unsuccessfull |  Contract closed
+;;        |                |                                 |                          |
+;;
+;;
+
+;; Remove before use on production. (extra operations for easy code reading)
+int Status::Init()                                    { return 0x0; }
+int Status::Delegation()                              { return 0x1; }
+int Status::NeedToStakeToElect()                      { return 0x2; }
+int Status::NotStakedToElectOnTime()                  { return 0x4; }
+int Status::WaitingForNextVset()                      { return 0x3; }
+int Status::WaitingToWithdrawFundsFromElector()       { return 0x6; }
+int Status::NeedToWithdrawFundsFromElector()          { return 0x5; }
+int Status::CanWithdrawalFromDelegationPool()         { return 0x7; }
+int Status::ValidatorCanWithdrawRemainingFunds1()     { return 0x8; } ;; after 0x4
+int Status::ValidatorCanWithdrawRemainingFunds2()     { return 0xE; } ;; after 0x7
+
+int Operation::Delegate()                             { return 0x543c1024; }
+int Operation::StakeToElect()                         { return 0x654c5074; }
+int Operation::RecoverStakedAmount()                  { return 0x442c1023; }
+int Operation::StakeCallbackFromElect()               { return 0xf374484c; }
+int Operation::GetCreditsBackFromElect()              { return 0x59637324; }
+int Operation::CreditsCallbackFromElect()             { return 0xf96f7324; }
+int Operation::WithdrawFromDelegationPool()           { return 0x79637324; }
+int Operation::RecoverRemainingFunds()                { return 0x68526213; }
+
+;; todo: make callbacks to allow to stake to this contract from other
+;; todo: set up min stake sum
+;; todo: set up in init params validator's fee
+
+() store_data(contract_status, deadline, grams, validator_public_key, delegators) impure {
+    set_data(begin_cell()
+        .store_uint(contract_status, 4)
+        .store_uint(deadline, 32)
+        .store_grams(grams)
+        .store_uint(validator_public_key, 256)
+        .store_dict(delegators)
+        .end_cell());
+}
+
+_ ~load_data(ds) impure {
+    return (ds, (ds~load_grams(), ds~load_uint(256), ds~load_dict()));
+}
+
+;; elected_for elections_begin_before elections_end_before stake_held_for
+(int, int, int, int) get_validator_conf() {
+  var cs = config_param(15).begin_parse();
+  return (cs~load_int(32), cs~load_int(32), cs~load_int(32), cs.preload_int(32));
+}
+
+;; min_stake max_stake min_total_stake max_stake_factor
+(int, int, int, int) get_stake_conf() {
+    var stake_conf = config_param(17).begin_parse();
+    return (stake_conf~load_grams(), stake_conf~load_grams(), stake_conf~load_grams(), stake_conf.preload_uint(32));
+}
+
+_ ~credit_to(credits, addr, amount) {
+  var (val, f) = credits.udict_get?(256, addr);
+  if (f) {
+    amount += val~load_grams();
+  }
+  credits~udict_set_builder(256, addr, begin_cell().store_grams(amount));
+  return (credits, ());
+}
+
+_ ~set_stake(delegators, pub, address, amount) {
+  if (dict_empty?(delegators)) {
+      delegators~udict_set_builder(256, pub, begin_cell().store_grams(amount).store_uint(address, 256));
+      return (delegators, ());
+  }
+  var (d, f) = delegators.udict_get?(256, pub);
+  if (f) {
+    amount += d~load_grams();
+    throw_unless(409, address == d~load_uint(256));
+  }
+  delegators~udict_set_builder(256, pub, begin_cell().store_grams(amount).store_uint(address, 256));
+  return (delegators, ());
+}
+
+;; expensive operation, may be possible to fix it
+int contain(cell dict, int validator_public_key) {
+    int isExist = false;
+    int id = -1;
+    do {
+        (id, var fs, var f) = dict.udict_get_next?(16, id);
+        if (f) {
+            var pub = fs.skip_bits(8 + 32).preload_uint(256);
+            if (pub == validator_public_key) {
+              isExist = true;
+            }
+        }
+    } until (~ f);
+    return isExist;
+}
+
+(int) allow_withdrawal(int contract_status, int deadline, int validator_public_key) {
+    var (validators_elected_for, _, _, _) = get_stake_conf();
+
+    var current_time = now();
+    var cur_vset_deadline = deadline + validators_elected_for;
+    var prev_vset_deadline = cur_vset_deadline + validators_elected_for;
+
+    if (current_time > prev_vset_deadline) {
+        ;; assumption
+        ;; if stake_held_for > validation_close * 2 than allow to try to withraw
+        return true;
+    }
+
+    if (current_time > cur_vset_deadline) {
+        var prev_vset = config_param(32); ;; previous validator set
+
+        var validators = prev_vset.begin_parse().skip_bits(8 + 32 + 32 + 16 + 16 + 64).preload_dict();
+        return validators.contain(validator_public_key) ? false : true;
+    }
+
+    var cur_vset = config_param(34); ;; current validator set
+
+    var validators = cur_vset.begin_parse().skip_bits(8 + 32 + 32 + 16 + 16 + 64).preload_dict();
+    return validators.contain(validator_public_key) ? false : true;
+}
+
+_ ~update_status(ds) {
+    var (contract_status, deadline) = (ds~load_uint(4), ds~load_uint(32));
+    var ds_copy = ds;
+
+    var current_time = now();
+    if (current_time <= deadline) {
+        return (ds, (contract_status, deadline));
+    }
+    
+    contract_status += contract_status;
+
+    ;; deposit deadline is over
+    ;; validator can provide data and total_stake from this contract
+    if (contract_status == Status::NeedToStakeToElect()) {
+        var timings = config_param(15).begin_parse();
+        var validators_elected_for = timings.preload_int(32);
+        ;; validator should deposit during 5 elections time frame
+        deadline += (validators_elected_for * 5);
+        if (current_time > deadline) {
+            contract_status += contract_status;
+        }
+    }
+
+    ;; validator didn't have time to stake on time
+    if (contract_status == Status::NotStakedToElectOnTime()) {
+        ;; after that time validator will be able to withdraw the remaining funds
+        deadline += (3600 * 24 * 30 * 2); ;; 2 month
+        if (current_time > deadline) {
+            contract_status += contract_status;
+        }
+    }
+
+    ;; at this stage we need to check are we in validator list
+    ;; if yes let's wait `validators_elected_for` - validator period delta since start of validation
+    ;; and `stake_held_for` - delta to withdrawal stake from elector contract
+    ;; else move to withdrawal funds without bonuses from elector contract (allowed for each participant)
+    if (contract_status == Status::WaitingToWithdrawFundsFromElector()) {
+        ds_copy~load_grams(); ;; skip grams
+        var validator_public_key = ds_copy~load_uint(256);
+        if (allow_withdrawal(contract_status, deadline, validator_public_key)) {
+            ;; wait unlimit time while someone will trigger recover_stake from elector contract
+            contract_status = Status::NeedToWithdrawFundsFromElector(); 
+            deadline = 0xFFFFFFFF;
+        } 
+    }
+
+    ;; validator can withdrawal the remaining funds
+    if (
+        (contract_status == Status::ValidatorCanWithdrawRemainingFunds1()) | 
+        (contract_status == Status::ValidatorCanWithdrawRemainingFunds2())
+    ) {
+        deadline = 0xFFFFFFFF;
+    }
+
+    return (ds, (contract_status, deadline));
+}
+
+() withdraw_remaining_funds(ds, cs, s_addr, contract_status) impure {
+    var amount = cs~load_grams();
+
+    var total_stake = ds~load_grams();
+    var validator_public_key = ds~load_uint(256);
+
+    var (_, my_addr) = my_address().parse_std_addr();
+
+    var public_key = cs~load_uint(256);
+    var contract_address = cs~load_uint(256); 
+    throw_unless(204, contract_address == my_addr); ;; protect from previous states (last smart contracts)
+    var sig_ref = cs~load_ref().begin_parse();
+    var signature = sig_ref.preload_bits(512);
+
+    throw_unless(205, check_data_signature(begin_cell()
+      .store_uint(public_key, 256)
+      .store_uint(contract_address, 256)
+    .end_cell().begin_parse(), signature, validator_public_key));
+
+    accept_message();
+
+    var msg = begin_cell()
+        .store_uint(0x18, 6)  
+        .store_slice(s_addr)
+        .store_grams(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(0, 32);
+
+    set_data(begin_cell()
+        .store_uint(contract_status, 4)
+        .store_uint(0xFFFFFFFF, 32) 
+        .store_grams(total_stake)
+        .store_uint(validator_public_key, 256)
+        .end_cell());
+
+    send_raw_message(msg.end_cell(), 3);
+}
+
+() withdraw(ds, s_addr, deadline) impure {
+    var (total_stake, validator_public_key, delegators) = ds~load_data();
+    var credits = ds~load_dict();
+    var (_, src_addr) = parse_std_addr(s_addr);
+
+    var (c, found) = credits~udict_delete_get?(256, src_addr);
+    throw_unless(170, found);
+
+    var amount = c~load_grams();
+    var msg = begin_cell()
+        .store_uint(0x18, 6) ;; 011000
+        .store_slice(s_addr)
+        .store_grams(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(0, 32);
+
+    set_data(begin_cell()
+        .store_uint(Status::CanWithdrawalFromDelegationPool(), 4)
+        .store_uint(deadline, 32)
+        .store_grams(total_stake)
+        .store_uint(validator_public_key, 256)
+        .store_dict(delegators)
+        .store_dict(credits)
+        .end_cell());
+
+    send_raw_message(msg.end_cell(), 64);
+}
+
+;; callback from elector contract should call this to calculate credits
+() confirm_refund(ds, msg_value) impure {
+    var (total_stake, validator_public_key, delegators) = ds~load_data();
+
+    accept_message(); ;;  what about goin up?
+    var credits = new_dict();
+    var pubkey = -1;
+    do {
+        (pubkey, var cs, var f) = delegators.udict_get_next?(256, pubkey);
+        if (f) {
+            var (stake, addr) = (cs~load_grams(), cs~load_uint(256));
+            cs.end_parse();
+            ;; may contain the remainder of the fractional part
+            ;; in this case validator will be able to withdrawal remaining amount after 2 month
+            var refund = msg_value * stake / total_stake; 
+            credits~credit_to(addr, refund);
+        }
+    } until (~ f);
+
+    set_data(begin_cell()
+        .store_uint(Status::CanWithdrawalFromDelegationPool(), 4) ;; next contract status
+        .store_uint(now() + (3600 * 24 * 30 * 2), 32) ;; need to get grams from pool during 2 month
+        .store_grams(total_stake)
+        .store_uint(validator_public_key, 256)
+        .store_dict(delegators)
+        .store_dict(credits)
+        .end_cell());
+}
+
+;; request to withdraw stake from elector contract
+() recover_stake(ds, contract_status, deadline) impure {
+    var elector_param = config_param(1);
+    var elector_addr = elector_param.begin_parse().preload_uint(256);
+            
+    set_data(begin_cell().store_uint(contract_status, 4).store_uint(deadline, 32).store_slice(ds).end_cell());
+
+    send_raw_message(begin_cell()
+        .store_uint(0xc4ff, 17)
+        .store_uint(elector_addr, 256)
+        .store_grams(1000000000) ;; need to forward additional fee because of "do until" in callback
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(0x47657424, 32)
+        .store_uint(now(), 64)
+        .end_cell(), 1);
+}
+
+() confirm_delegation_to_elect(ds, int elect_start) impure {
+    var cur_vset = config_param(34); ;; current validator set
+    ;; in case of elect contract migration :)
+    if (cur_vset.null?()) {
+        var timings = config_param(15).begin_parse();
+        var validators_elected_for = timings.preload_uint(32);
+        var deadline = elect_start + validators_elected_for * 34 / 100; ;; approximately
+        set_data(begin_cell().store_uint(Status::WaitingForNextVset(), 4).store_uint(deadline, 32).store_slice(ds).end_cell());
+        return ();
+    }
+
+    ;; after that time we will be able to figure out are we in validator list or not 
+    var cur_valid_until = cur_vset.begin_parse().skip_bits(8 + 32).preload_uint(32); ;; current validtor set ending time 
+
+    set_data(begin_cell().store_uint(Status::WaitingForNextVset(), 4).store_uint(cur_valid_until, 32).store_slice(ds).end_cell());
+}
+
+() stake_to_elect(ds, cs, int contract_status, int deadline) impure {
+    var (total_stake, validator_public_key, delegators) = ds~load_data();
+
+    var (min_stake, max_stake, _, max_stake_factor) = get_stake_conf();
+    
+    throw_unless(150, total_stake >= min_stake); 
+    throw_unless(151, total_stake <= max_stake);
+
+    var (
+        elect_time,
+        max_factor,
+        adnl_addr
+    ) = (cs~load_uint(32), cs~load_uint(32), cs~load_uint(256));
+
+    throw_if(152, max_factor < 0x10000);                ;; throw if to unless? checking that our max factor is > than minimum
+    throw_unless(153, max_factor <= max_stake_factor);  ;; checking that our max factor is less or equal than the max one
+
+    var (_, my_addr) = my_address().parse_std_addr();
+
+    var signature_ref = cs~load_ref();
+    var signature = signature_ref.begin_parse().preload_bits(512);
+
+    throw_unless(154, check_data_signature(begin_cell()
+      .store_uint(0x654c5074, 32)  ;; operation on elect contract - check signature of validator and get answer to delegation pool
+      .store_uint(elect_time, 32)
+      .store_uint(max_factor, 32)
+      .store_uint(my_addr, 256)
+      .store_uint(adnl_addr, 256)
+    .end_cell().begin_parse(), signature, validator_public_key));
+    
+    var elector_param = config_param(1); 
+    throw_if(155, cell_null?(elector_param)); ;; check that elector contract is existing
+    var elector_addr = elector_param.begin_parse().preload_uint(256);
+
+    accept_message();
+
+    var body_message = begin_cell()
+        .store_uint(0x4e73744b, 32) ;;  operation on elect contract - run method to stake grams from delegation pool
+        .store_uint(elect_time, 64) ;; we will handle the election time on confirmation stage
+        .store_uint(validator_public_key, 256)
+        .store_uint(elect_time, 32)
+        .store_uint(max_factor, 32)
+        .store_uint(adnl_addr, 256)
+        .store_ref(signature_ref)
+        .end_cell();
+
+    send_raw_message(begin_cell()
+        .store_uint(0xc4ff, 17)        ;; 11000100 0xff
+        .store_uint(elector_addr, 256)
+        .store_grams(total_stake)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1)
+        .store_uint(1, 1) ;; msg_body read from ref
+        .store_ref(body_message)
+        .end_cell(), 1);
+
+    store_data(contract_status, deadline, total_stake, validator_public_key, delegators);
+}
+
+() return_staked_amount(ds, cs, s_addr, deadline) impure {
+    var (total_stake, validator_public_key, delegators) = ds~load_data();
+
+    var (wc, src_addr) = parse_std_addr(s_addr);
+    throw_if(141, wc + 1);
+
+    var public_key = cs~load_uint(256);
+
+    var (d, found) = delegators~udict_delete_get?(256, public_key);
+    throw_unless(170, found);
+
+    var amount = d~load_grams();
+    var address = d~load_uint(256);
+
+    throw_unless(192, address == src_addr);
+    total_stake -= amount;
+
+    var msg = begin_cell()
+        .store_uint(0x18, 6)  
+        .store_slice(s_addr)
+        .store_grams(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(0, 32);
+
+    set_data(begin_cell()
+        .store_uint(Status::NotStakedToElectOnTime(), 4)
+        .store_uint(deadline, 32)
+        .store_grams(total_stake)
+        .store_uint(validator_public_key, 256)
+        .store_dict(delegators)
+        .end_cell());
+
+    send_raw_message(msg.end_cell(), 64);
+}
+
+;; delegate - allows to send GRAMs to the pool
+;; if delegated person become validator
+;; your GRAMs will be freezed during elections and validation period
+;; else you can withdraw your funds after elections
+() delegate(ds, delegator_public_key, s_addr, msg_value, contract_status, deadline) impure {
+    var (src_wc, src_addr) = parse_std_addr(s_addr);
+    if (src_wc + 1) {
+        ;; not from masterchain
+        return();
+    }
+
+    var (total_stake, validator_public_key, delegators) = ds~load_data();
+
+    throw_if(140, msg_value <= 0); ;; for tests 0. for production testnet should be replaced with minimal stake amount for delegators min_stake.
+
+    var (_, max_stake, _, _) = get_stake_conf();    
+    total_stake += msg_value;
+    throw_unless(141, total_stake <= max_stake);
+    accept_message();
+
+    delegators~set_stake(delegator_public_key, src_addr, msg_value); 
+    store_data(contract_status, deadline, total_stake, validator_public_key, delegators);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    var cs = in_msg_cell.begin_parse();
+    var flags = cs~load_uint(4); 
+    if (flags & 1) {
+        ;; ignore all bounced messages
+        return ();
+    }
+    var s_addr = cs~load_msg_addr();
+
+    var ds = get_data().begin_parse();
+    var (contract_status, deadline) = ds~update_status(); 
+    
+    var op = in_msg~load_uint(32);
+    if ((op == Operation::Delegate()) & (contract_status == Status::Delegation())) {
+        return delegate(ds, in_msg~load_uint(256), s_addr, msg_value, contract_status, deadline);
+    }
+
+    if ((op == Operation::StakeToElect()) & (contract_status == Status::NeedToStakeToElect())) {
+        return stake_to_elect(ds, in_msg, contract_status, deadline);
+    }
+
+    ;; validator didn't stake on time
+    ;; delegators can withdraw stakes
+    if ((op == Operation::RecoverStakedAmount()) & (contract_status == Status::NotStakedToElectOnTime())) {
+        return return_staked_amount(ds, in_msg, s_addr, deadline);
+    }
+
+    ;; callback from elector that your stake was accepted
+    if ((op == Operation::StakeCallbackFromElect()) & (contract_status == Status::NeedToStakeToElect())) {
+        var (src_wc, src_addr) = parse_std_addr(s_addr);
+        throw_if(141, src_wc + 1);
+        ;; callback should be from elector contract
+        var elector_param = config_param(1);
+        var elector_addr = cell_null?(elector_param) ? -1 : elector_param.begin_parse().preload_uint(256);
+        throw_unless(141, src_addr == elector_addr);
+
+        accept_message();
+        ;; forwarded from elector contract
+        ;; we proxy this value to avoid setting it in storage
+        var elect_start = in_msg~load_uint(64); 
+        return confirm_delegation_to_elect(ds, elect_start);
+    }
+
+    ;; each participant could request to get credits back to pool contract
+    if ((op == Operation::GetCreditsBackFromElect()) & (contract_status == Status::NeedToWithdrawFundsFromElector())) {
+       accept_message(); 
+       return recover_stake(ds, contract_status, deadline);
+    }
+
+    ;; confirm withdrawal from elector contract
+    if ((op == Operation::CreditsCallbackFromElect()) & (contract_status == Status::NeedToWithdrawFundsFromElector())) {
+        var (src_wc, src_addr) = parse_std_addr(s_addr);
+        throw_if(141, src_wc + 1);  
+
+        ;; callback should be from elector contract
+        var elector_param = config_param(1);
+        var elector_addr = cell_null?(elector_param) ? -1 : elector_param.begin_parse().preload_uint(256);
+        throw_unless(141, src_addr == elector_addr);
+        return confirm_refund(ds, msg_value);
+    }
+
+    ;; withdraw grams from pool contract
+    if ((op == Operation::WithdrawFromDelegationPool()) & (contract_status == Status::CanWithdrawalFromDelegationPool())) {
+        return withdraw(ds, s_addr, deadline);
+    }
+
+    if (
+        (op == Operation::RecoverRemainingFunds()) & 
+        (
+            (contract_status == Status::ValidatorCanWithdrawRemainingFunds1()) |
+            (contract_status == Status::ValidatorCanWithdrawRemainingFunds2())
+        )
+    ) {
+        return withdraw_remaining_funds(ds, in_msg, s_addr, contract_status);
+    }
+
+    return ();
+}
+
+() recv_external(slice in_msg) impure {
+    var ds = get_data().begin_parse();
+    var ( 
+        contract_status,
+        raising_deadline,
+        stored_grams,
+        validator_public_key,
+        delegators
+    ) = (ds~load_uint(4), ds~load_grams(), ds~load_uint(32), ds~load_uint(256), ds~load_dict());
+    
+    ;; recv_external allowed only during initial state
+    throw_unless(101, contract_status == Status::Init());
+
+    ;; the code below only available for final pool contract. Not additional pool contracts
+    var (wc, _) = my_address().parse_std_addr();
+    throw_if(102, wc + 1); ;; deployed contract should be on masterchain
+    
+    var delegation_deadline = in_msg~load_uint(32);
+
+    accept_message();
+
+    store_data(Status::Delegation(), now() + delegation_deadline, 0, validator_public_key, delegators);
+}
+
+(int, int) recorded_status() method_id {
+    var ds = get_data().begin_parse();
+    var (contract_status, deadline) = (ds~load_uint(4), ds~load_uint(32));
+    return (contract_status, deadline);
+}
+
+(int, int) remaining_time_to_deadline() method_id {
+    var ds = get_data().begin_parse();
+    var (_, deadline) = (ds~load_uint(4), ds~load_uint(32));
+    return ((deadline - now()), now() <= deadline);
+}
+
+int validator_public_key() method_id {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    ds~load_grams();
+    return ds.preload_uint(256);
+}
+
+int total_stake() method_id {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    return ds~load_grams();
+}
+
+_ delegators_list() method_id {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    ds~load_grams();
+    var delegators = ds.skip_bits(256).preload_dict();
+    if (dict_empty?(delegators)) {
+        return nil;
+    }
+    var l = nil;
+    var id = (1 << 255) + ((1 << 255) - 1);
+    do {
+        (id, var fs, var f) = delegators.udict_get_prev?(256, id);
+        if (f) {
+        l = cons(id, l);
+        }
+    } until (~ f);
+    return l;
+}
+
+;; the list of delegators with their stakes
+_ delegators_list_extended() method_id {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    ds~load_grams();
+    var delegators = ds.skip_bits(256).preload_dict();
+    if (dict_empty?(delegators)) {
+        return nil;
+    }
+    var l = nil;
+    var id = (1 << 255) + ((1 << 255) - 1);
+    do {
+        (id, var fs, var f) = delegators.udict_get_prev?(256, id);
+        if (f) {
+            l = cons(pair(pair(id, fs~load_grams()), fs~load_uint(256)), l);
+        }
+    } until (~ f);
+    return l;
+}
+
+int stacked_amount(int delegator_public_key) method_id {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    ds~load_grams();
+    var delegators_dict = ds.skip_bits(256).preload_dict();
+    var (delegator_instance, found) = delegators_dict.udict_get?(256, delegator_public_key);
+    return found ? delegator_instance~load_grams() : 0;
+}
+
+;; the list of stakes + rewards by users
+_ credits_list_extended() method_id {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    ds~load_grams();
+    ds~load_uint(256);
+    if (slice_empty?(ds)) {
+        return nil;
+    }
+    ds~load_dict(); ;; skip delegators
+    if (slice_empty?(ds)) {
+        return nil;
+    }
+    var credits = ds~load_dict();
+   
+    var l = nil;
+    var address = -1;
+    do {
+        (address, var fs, var f) = credits.udict_get_next?(256, address);
+        if (f) {
+            l = cons(pair(address, fs~load_grams()), l);
+        }
+    } until (~ f);
+    return l;
+}
+
+int returned_stake(int address) {
+    var ds = get_data().begin_parse().skip_bits(4 + 32);
+    ds~load_grams();
+    ds~load_uint(256);
+    if (slice_empty?(ds)) {
+        return 0;
+    }
+    ds~load_dict(); ;; skip delegators
+    if (slice_empty?(ds)) {
+        return 0;
+    }
+    var credits = ds~load_dict();
+    var (s, f) = credits.udict_get?(256, address);
+    ifnot (f) {
+        return 0;
+    }
+    return s~load_grams();
+}

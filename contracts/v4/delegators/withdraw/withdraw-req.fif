@@ -1,0 +1,17 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+
+{ ."usage: " @' $0 type ." [<savefile>]" cr
+  ."Creates a request to withdraw grams from delegation_pool contract" cr 1 halt
+} : usage
+$# dup 0 < swap 1 > or ' usage if
+
+def? $1 { @' $1 } { "msg-body" } cond constant output_fname
+
+now dup constant query_id ."query_id set to " . cr
+
+<b x{79637324} s, query_id 64 u, b>
+
+cr ."Message body is " dup <s csr. cr
+
+2 boc+>B output_fname +".boc" tuck B>file ."Saved to file " type cr

@@ -1,0 +1,19 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+
+{ ."usage: " @' $0 type ." <validator-public-key> <delegation-pool-address>" cr
+  ."Creates a body message for signing on validator side to withdraw grams from delegator_pool contract" cr 1 halt
+  ." (When validator allowed to withdrawal remaining funds)"
+} : usage
+$# 2 < ' usage if
+
+true =: bounce
+
+$1 base64>B dup Blen 36 <> abort"validator Ed25519 public key must be exactly 36 bytes long"
+  32 B>u@+ 0xC6B41348 <> abort"invalid Ed25519 public key: unknown magic number"
+  constant pubkey
+$2 bounce parse-load-address =: bounce 2=: contract_address
+
+pubkey contract_address swap drop 256 u>B B+ constant to_sign
+
+to_sign Bx. cr
