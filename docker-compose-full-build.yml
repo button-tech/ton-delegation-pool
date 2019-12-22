@@ -19,7 +19,7 @@ services:
     links:
        - mongo
     environment:
-       - DB_URI=mongodb://contest:contest@mongodb:27017
+       - DB_URI=mongodb://contest:contest@mongo:27017
 
   mongo:
     container_name: mongo
