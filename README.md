@@ -14,6 +14,7 @@ You can create your own delegation pool and participate in elections using deleg
 ### Running everything 
 
 ### Interaction with elector smart contract (mocked for fast tests)
+https://youtu.be/y9RfvadfX2c
 
 # Presentation
 
