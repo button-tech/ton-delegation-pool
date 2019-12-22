@@ -262,7 +262,7 @@ async def create_delegations_pool(data: DataForCreate):
      if len(result) != 2:
          raise HTTPException(status_code=500, detail="error")
 
-     info = {"contractAddress":result[0], "hexBoc": result[1] }
+     info = {"contractAddress" :result[0], "hexBoc": result[1] }
 
      _ = await asyncio.create_task(create_and_send_boc(info["hexBoc"]))
 
