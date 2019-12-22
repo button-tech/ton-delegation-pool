@@ -1,9 +1,13 @@
 # Delegation Pool Contract
 
 Here you can find two versions of delegation pool contract
+
 `v3` - basic delegation_pool
 
 `v4` - delegation_pool with callbacks that allows to create sub-delegations pools and handle callbacks
+
+Contract statuses flow:
+![Contract statuses map](https://github.com/button-tech/ton-delegation-pool/blob/master/docs/Statuses.png)
 
 ## Installation
 

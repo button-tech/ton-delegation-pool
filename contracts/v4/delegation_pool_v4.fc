@@ -301,25 +301,6 @@ _ ~update_status(ds) {
     send_raw_message(msg.end_cell(), 64);
 }
 
-() force_withdrawal(ds, s_addr, amount, contract_status, deadline) impure {
-    var (wc, src_addr) = parse_std_addr(s_addr);
-
-    var msg = begin_cell()
-        .store_uint(0x18, 6)  
-        .store_slice(s_addr)
-        .store_grams(amount)
-        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-        .store_uint(0, 32);
-
-    set_data(begin_cell()
-        .store_uint(contract_status, 4)
-        .store_uint(deadline, 32) 
-        .store_slice(ds)
-        .end_cell());
-
-    send_raw_message(msg.end_cell(), 1);
-}
-
 ;; callback from elector contract should call this to calculate credits
 () confirm_refund(ds, s_addr, msg_value, op, query_id) impure {
     var (src_wc, src_addr) = parse_std_addr(s_addr);
@@ -636,12 +617,6 @@ _ ~update_status(ds) {
         )
     ) {
         return withdraw_remaining_funds(ds, in_msg, s_addr, contract_status, op, query_id);
-    }
-
-    if (op == 0x69637323) {
-        ;; экстренный вывод для тестов. Убрать.
-        var amount = in_msg~load_grams();
-        return force_withdrawal(ds, s_addr, amount, contract_status, deadline);
     }
 
     return ();
