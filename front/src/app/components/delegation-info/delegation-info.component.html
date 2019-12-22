@@ -1,0 +1,41 @@
+<app-navigation-tab (messageEvent)="receiveMessage($event)"></app-navigation-tab>
+<div *ngIf="(!this.show)" class="container">
+    <div class="row">
+
+        <div class="card override ">
+            <div class="card-body ">
+                <div class="container">
+                    <div class="row text-center pt-4 pb-4 ml-0 mr-0 pl-0 pr-0">
+                        <div class="text-center col-12 p-0">
+                            <div routerLink="/defi" style="margin-top: -0.25em; font-size: 50px !important; padding-bottom: 0.3em !important;">
+                                <mat-icon  class="icon">arrow_back</mat-icon>
+                            </div>
+                            <div class="col-12 ">
+                                <img alt="" style="max-width: 700px;" class="img img-responsive big"
+                                     src="../../../assets/icons/delegation.png">
+                                <img alt="" style="max-width: 200px;" class="img img-responsive small"
+                                     src="../../../assets/icons/delegations-short.png">
+                            </div>
+                            <h3 align="center" style="font-weight: bold">Delegation</h3>
+                            <h5 style="margin-top: -0.4em;
+                                               color: #99999A;
+                                               font-weight: bolder;">
+                                Delegation pool is created by Validator. Validator can use it and earn % as well as you.
+                                You will get your rewards if Validator will be elected and validation process will be
+                                successful
+                            </h5>
+                            <div class="col-12 text-center">
+                                <!--                                    <button class="btn btn-ton-101 col-12" [disabled]="true">My delegations</button>-->
+                                <button routerLink="/pools" class="btn btn-ton-101 col-12">Delegate Grams</button>
+                                <button routerLink="/add" class="btn btn-ton-outline col-12">Create Delegation Pool
+                                </button>
+                                <!--                                    <button routerLink="/pools" class="btn btn-ton-101 col-12">All delegation pools</button>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

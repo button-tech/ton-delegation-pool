@@ -1,0 +1,83 @@
+<app-navigation-tab (messageEvent)="receiveMessage($event)"></app-navigation-tab>
+<div *ngIf="!this.show" class="container">
+    <div class="row">
+        <div class="card override ">
+            <div class="card-body ">
+                <div class="container">
+                    <div class="col-12 pt-4 pb-4">
+                        <h1 class="text-center">✅</h1>
+                        <h4 class="pt-4 pl-2 pr-2" align="center"
+                            style="color: #212325; margin-top: -0.05em; margin-bottom: 0em; padding-bottom: 0;font-weight: bolder; font-size: 19px">
+                            Success! Contract deployed </h4>
+                        <h5 class="pt-0 pl-2 pr-2" align="center" style="margin-top: -0.1em;
+                                               color: #99999A;
+                                               font-weight: bolder;">
+                            You will see it in Delegations Pool List
+                        </h5>
+                        <div *ngIf="contractAddress.length > 0" class="d-inline-flex not-for-small">
+                            <div class="col-md-11 col-xs-12 ">
+                                <h5 class="pt-0 pl-2 pr-2" align="left" style="margin-top: -0.1em;
+                                               color: #99999A;
+                                               font-weight: bolder;">Contract address:
+                                    <strong>{{this.contractAddress}}</strong></h5>
+                            </div>
+                            <div style="margin-top: -0.5em; margin-left: 0.1em" class="col-md-1 col-xs-12">
+                                <button [satPopoverAnchor]="copyN"
+                                        (mouseenter)="copyN.open()"
+                                        (mouseleave)="copyN.close(); this.copyMessage='Copy to clipboard';" id="addr"
+                                        (click)="this.copyAddress(this.contractAddress);"
+                                        style="background: #212325" class="btn btn-just-icon btn-sm">
+                                    <mat-icon>file_copy</mat-icon>
+                                </button>
+                            </div>
+                            <sat-popover #copyN horizontalAlign="center" openTransition="150ms ease-out"
+                                         closeTransition="150ms ease-in"
+                                         verticalAlign="below">
+                                <div class="tooltip-wrapper">
+                                    {{this.copyMessage}}
+                                </div>
+                                <div class="arrow">
+                                </div>
+                            </sat-popover>
+                        </div>
+                        <div *ngIf="contractAddress.length > 0"
+                             class="d-inline-flex not-for-big text-center align-self-center justify-content-center">
+                            <div class="col-md-11 col-xs-12 ">
+                                <h5 class="pt-0 pl-2 pr-2" align="left" style="margin-top: 0.4em;
+                                               color: #99999A;
+                                               font-weight: bolder;">Copy address</h5>
+                            </div>
+                            <div class="col-md-1 col-xs-12 text-center">
+                                <button [satPopoverAnchor]="copyN"
+                                        (mouseenter)="copyN.open()"
+                                        (mouseleave)="copyN.close(); this.copyMessage='Copy to clipboard';" id="addr2"
+                                        (click)="this.copyAddress(this.contractAddress);"
+                                        style="background: #212325" class="btn btn-just-icon btn-sm">
+                                    <mat-icon>file_copy</mat-icon>
+                                </button>
+                            </div>
+                            <sat-popover #copyN horizontalAlign="center" openTransition="150ms ease-out"
+                                         closeTransition="150ms ease-in"
+                                         verticalAlign="below">
+                                <div class="tooltip-wrapper">
+                                    {{this.copyMessage}}
+                                </div>
+                                <div class="arrow">
+                                </div>
+                            </sat-popover>
+                        </div>
+                        <div>
+                            <button class="btn btn-ton-outline col-12" (click)="openNewTab(this.contractAddress)">See on explorer
+                            </button>
+                            <button class="btn btn-ton-100 col-12" routerLink="/delegate/{{this.contractAddress}}">My
+                                Contract
+                            </button>
+                            <button class="btn btn-ton-100 col-12" routerLink="/pools">Delegation list</button>
+                            <button class="btn btn-ton-100 col-12" routerLink="/main">Main menu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

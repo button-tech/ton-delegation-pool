@@ -1,0 +1,48 @@
+<app-navigation-tab (messageEvent)="receiveMessage($event)"></app-navigation-tab>
+<div *ngIf="!this.show" class="container">
+    <div class="row">
+        <div class="card override ">
+            <div class="card-body ">
+                <div>
+                    <div class="text-center"
+                         style="margin-top: 0.24em; font-size: 50px !important; padding-bottom: 0.3em !important; ">
+                        <mat-icon routerLink="/delegation" class="icon">arrow_back</mat-icon>
+                    </div>
+
+                </div>
+                <div class="container">
+                    <h4 class="pt-4 pl-2 pr-2" align="left"
+                        style="color: #212325; margin-top: -0.05em; margin-bottom: 0em; padding-bottom: 0;font-weight: bolder; font-size: 19px">
+                        Create a deligation pool</h4>
+                    <h5 class="pt-0 pl-2 pr-2" align="left" style="margin-top: -0.1em;
+                                               color: #99999A;
+                                               font-weight: bolder;">
+                        You need to send 1 Gram to activate contract. When it will be activated. We will redirect you to
+                        the final step
+                    </h5>
+                    <h5 class="pt-0 pl-2 pr-2" align="left" style="margin-top: -0.1em;
+                                               color: #99999A;
+                                               font-weight: bolder;">Contract address:
+                        <strong>{{this.contractInfo.contractAddress}}</strong></h5>
+                    <h5 *ngIf="!erroBal && !wasSent" class="pt-0 pl-2 pr-2" align="left" style="margin-top: -0.1em;
+                                               color: red;
+                                               font-weight: bolder;">Not enough 💎 Grams. You need at least
+                        <strong>1.05</strong> 💎 Grams</h5>
+                    <div class="row pt-0 pb-4 ml-0 mr-0 pl-0 pr-0">
+                        <button *ngIf="!wasSent" [disabled]="!erroBal" class="btn btn-ton text-center col-12"
+                                style="width: 100% !important;"
+                                type="submit"
+                                (click)="send()">
+                            Send Grams
+                        </button>
+                        <h4 *ngIf="wasSent" class="text-center">
+                            Waiting for transaction confirmation ...
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

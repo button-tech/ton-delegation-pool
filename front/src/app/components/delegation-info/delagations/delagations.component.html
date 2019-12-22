@@ -1,0 +1,59 @@
+<app-navigation-tab (messageEvent)="receiveMessage($event)"></app-navigation-tab>
+<div *ngIf="(!this.show)" class="container">
+    <div class="row">
+        <div class="card override">
+            <div class="card-body">
+                <div class="col-12 text-center pt-4">
+                    <div routerLink="/delegation" style="margin-top: -0.25em; font-size: 50px !important; padding-bottom: 0.3em !important;">
+                        <mat-icon class="icon">arrow_back</mat-icon>
+                    </div>
+                    <h4 style="color: #212325;margin-bottom: 1.5em;font-weight: bolder; font-size: 19px">
+                        List of delegation pools</h4>
+                </div>
+            </div>
+            <div *ngIf="!(this.data | async )" style="margin-top: 3em; margin-bottom: 3em" class="text-center">
+                <loaders-css class="pt-4 pb-4" [loader]="loader"
+                             [scale]="3"
+                             [bgColor]="bgColor" [color]="color"></loaders-css>
+            </div>
+            <div *ngIf="(this.data | async ) as myVar ">
+                <div *ngIf="(myVar)[0].contractStatus != 'Unknown'" style="margin-top: -2em; " class="section">
+                    <div class="pl-4 pr-4">
+                        <div class="pr-4 align-self-center d-flex justify-content-between justify-content-center">
+                            <div class="align-self-center pl-4 ml-3 addrsr-2">Contract address</div>
+                            <div class="align-self-start pl-4 ml-3 pad">Pool status</div>
+                            <div class="align-self-center">Current APY</div>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="(myVar)[0].contractStatus != 'Unknown'">
+                    <div *ngFor="let i of myVar; let a = index" style="border-bottom: 0.5px solid #dbe3ea;"
+                         (click)="navigateTo(i.contractAddress)" class="pl-4 pr-4 pb-2 pt-3 ll">
+                        <div class="pr-4 align-self-center d-flex justify-content-between justify-content-center">
+                            <div style="text-align: center !important;" class="addrsr text-center ml-4">
+                                <p style="text-align: center !important;" class="ml-4">{{i.contractAddress}}</p>
+                            </div>
+                            <div style="text-align: left !important;" class="pad-lft">
+                                <p style="text-align: left !important;" class="">{{i.contractStatus}}</p>
+                            </div>
+
+                            <div class="mr-1 d-flex justify-content-between">
+                                <div>
+                                    {{((i?.estimatedApr?.toFixed(2)) || 0) + ' %'}}
+                                </div>
+                                <div style="margin-right: -2em; margin-left: 1em">
+                                    <mat-icon>chevron_right</mat-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <div class="text-center" *ngIf="!((myVar)[0].contractStatus != 'Unknown')">
+                    <h4 style="color: #677078;margin-bottom: 1.5em;font-weight: bolder; font-size: 19px">
+                       No pools available right now</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

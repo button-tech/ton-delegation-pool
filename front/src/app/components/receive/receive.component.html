@@ -1,0 +1,118 @@
+<div class="pb-4 pt-2">
+    <div class="col-12 p-0 m-0 pb-2">
+        <div class="d-inline-flex justify-content-between col-12 p-0">
+            <div><h4
+                    style="color: #212325; margin-top: -0.05em; margin-bottom: 1.5em; padding-bottom: 0;font-weight: bolder; font-size: 19px">
+                Receive Grams </h4></div>
+            <div (click)="closeModal()" style="align-self: end; padding-top: 0.1em">
+                <mat-icon class="icon">close</mat-icon>
+            </div>
+        </div>
+        <hr style="margin-top: -1.5em !important;">
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-xs-12 text-center">
+            <div #qrcode></div>
+        </div>
+        <div class="col-lg-12 col-xs-12 text-center row dada pl-4 d-inline-flex justify-content-center align-self-center">
+            <div class="col-lg-12 col-xs-12 p-md-12 pb-xs-12 p-lg-4 pr-2">
+                <h3 class="pt-lg-2">Addresses</h3>
+                <h6 style="margin-top: -1em; color: grey">List of your addresses in different
+                    format</h6>
+
+                <div class="row p-lg-4 pb-4 pt-4" style="">
+                    <div [satPopoverAnchor]="copyShort"
+                         (mouseenter)="copyShort.open()"
+                         (mouseleave)="copyShort.close(); this.copyMessage='Copy to clipboard';"
+                         id="addressButton"
+                         (click)="this.copyAddress(this.storage.getDataOfAccount().address.shortAddress);"
+                         class="col-8 p-1 offset-2"
+                         style=" background: #eeeeee; width: 200px !important;">
+                        <mat-icon class="pt-2">file_copy</mat-icon>
+                        <br>
+                        <strong class="text-center" style="font-weight: bold">Click to Copy</strong>
+                        <br>
+                        <p class="p-2 pb-0" style="font-size: 13px; font-weight: bolder;">
+                            {{this.storage.getDataOfAccount().address.shortAddress}}<br>
+                            <small style="font-size: 12px; font-weight: bolder;">Short
+                                Address</small>
+                        </p>
+                    </div>
+                    <div class="col-12 ">
+                        <sat-popover #copyShort horizontalAlign="center"
+                                     openTransition="150ms ease-out"
+                                     closeTransition="150ms ease-in"
+                                     verticalAlign="above">
+                            <div class="tooltip-wrapper">
+                                {{this.copyMessage}}
+                            </div>
+                            <div class="arrow">
+                            </div>
+                        </sat-popover>
+                    </div>
+                </div>
+                <div class="row p-lg-4 pb-4 pt-4">
+                    <div [satPopoverAnchor]="copyFull"
+                         (mouseenter)="copyFull.open()"
+                         (mouseleave)="copyFull.close(); this.copyMessage='Copy to clipboard';"
+                         id="addressButton2"
+                         (click)="this.copyAddress(this.storage.getDataOfAccount().address.fullAddress);"
+                         class="col-8 p-1 offset-2"
+                         style=" background: #eeeeee; width: 200px !important;">
+                        <mat-icon class="pt-2">file_copy</mat-icon>
+                        <br>
+                        <strong class="text-center" style="font-weight: bold">Click to Copy</strong>
+                        <br>
+                        <p class="p-2" style="font-size: 14px; font-weight: bolder;">
+                            {{this.storage.getDataOfAccount().address.fullAddress}}<br>
+                            <small style="font-size: 13px; font-weight: bolder;">Full
+                                Address</small>
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <sat-popover #copyFull horizontalAlign="center"
+                                     openTransition="150ms ease-out"
+                                     closeTransition="150ms ease-in"
+                                     verticalAlign="above">
+                            <div class="tooltip-wrapper">
+                                {{this.copyMessage}}
+                            </div>
+                            <div class="arrow">
+                            </div>
+                        </sat-popover>
+                    </div>
+                </div>
+                <div class="row p-lg-4 pb-4 pt-4">
+                    <div [satPopoverAnchor]="copyN"
+                         (mouseenter)="copyN.open()"
+                         (mouseleave)="copyN.close(); this.copyMessage='Copy to clipboard';"
+                         id="addressButton3"
+                         (click)="this.copyAddress(this.storage.getDataOfAccount().address.nonBounceableAddress);"
+                         class="col-8 p-1 offset-2"
+                         style=" background: #eeeeee; width: 200px !important;">
+                        <mat-icon class="pt-2">file_copy</mat-icon>
+                        <br>
+                        <strong class="text-center" style="font-weight: bold">Click to Copy</strong>
+                        <br>
+                        <p class="p-2" style="font-size: 13px; font-weight: bolder;">
+                            {{this.storage.getDataOfAccount().address.nonBounceableAddress}}  <br>
+                            <small style="font-size: 12px; font-weight: bolder;">Non Bounceable
+                                Address</small>
+                        </p>
+                    </div>
+                    <div class="pl-4 col-12">
+                        <sat-popover #copyN horizontalAlign="center" openTransition="150ms ease-out"
+                                     closeTransition="150ms ease-in"
+                                     verticalAlign="above">
+                            <div class="tooltip-wrapper">
+                                {{this.copyMessage}}
+                            </div>
+                            <div class="arrow">
+                            </div>
+                        </sat-popover>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

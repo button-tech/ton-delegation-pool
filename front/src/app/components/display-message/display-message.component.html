@@ -1,0 +1,16 @@
+<div class="container pt-4">
+  <div class="card pt-4" style="margin-top: 8em">
+    <div class="row pt-4 text-center">
+      <div class="col-12">
+        <img alt="" width="80"  src="../../../assets/icons/3033.jpg">
+      <h3>Are you sure ?</h3>
+      <p *ngIf="this.messageFrom === 'private'" style="color: grey; margin-top: -1em">Do not show private key to anyone and keep it safe</p>
+      <p *ngIf="this.messageFrom === 'delete'" style="color: grey; margin-top: -1em">Check that you have private key before it</p>
+      </div>
+    </div>
+    <div class="text-center pt-4 pb-4">
+      <button (click)="back()" class="btn btn-lg btn-outline-danger m-3">Back</button>
+      <button (click)="execute()" class="btn btn-lg btn-outline-danger m-3">Yes</button>
+    </div>
+  </div>
+</div>

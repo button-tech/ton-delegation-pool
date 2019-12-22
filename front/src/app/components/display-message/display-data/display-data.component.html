@@ -1,0 +1,30 @@
+<div class="container pt-4">
+  <div class="card pt-4" style="margin-top: 8em">
+    <div class="row pt-4 text-center">
+      <div class="col-12">
+        <img alt="" width="80"  src="../../../assets/icons/3033.jpg">
+        <h3>Copy it</h3>
+        <p class="p-4" style="color: grey; margin-top: -1em">{{this.storage.getDataOfAccount().privateKey}}</p>
+        <button [satPopoverAnchor]="copyN"
+                (mouseenter)="copyN.open()"
+                (mouseleave)="copyN.close(); this.copyMessage='Copy to clipboard';" id="pk"
+                (click)="this.copyAddress(this.storage.getDataOfAccount().privateKey);"
+                style="background: #212325" class="btn btn-just-icon btn-sm">
+          <mat-icon>file_copy</mat-icon>
+        </button>
+        <sat-popover #copyN horizontalAlign="center" openTransition="150ms ease-out"
+                     closeTransition="150ms ease-in"
+                     verticalAlign="below">
+          <div class="tooltip-wrapper">
+            {{this.copyMessage}}
+          </div>
+          <div class="arrow">
+          </div>
+        </sat-popover>
+      </div>
+    </div>
+    <div class="text-center pt-4 pb-4">
+      <button routerLink="/" class="btn btn-lg btn-outline-danger m-3">Continue</button>
+    </div>
+  </div>
+</div>

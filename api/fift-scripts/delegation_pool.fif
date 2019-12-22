@@ -1,0 +1,58 @@
+#!/usr/bin/env fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+{ ."usage: " @' $0 type ." <validator-public-key> <delegation-deadline-delta> [<savefile>]" cr 1 halt } : usage
+$# dup 2 < swap 3 > or ' usage if
+
+-1 =: wc  
+
+$1 base64>B dup Blen 36 <> abort"validator Ed25519 public key must be exactly 36 bytes long"
+  32 B>u@+ 0xC6B41348 <> abort"invalid Ed25519 public key: unknown magic number"
+  constant pubkey
+$2 parse-int =: delegation-deadline
+def? $3 { @' $3 } { "delegation_pool" } cond constant file-base
+
+."Creating new delegation_pool in workchain " wc . cr
+"outputFileWithFiftAsm.fif" constant source-code
+
+PROGRAM{
+  source-code include
+}END>c
+
+<b 
+  0x0 4 u,      // contract_status
+  0 32 u,       // deadline
+  0 Gram,       // staked_amount
+  pubkey B,     // validators public key
+  dictnew dict, // delegators dict   
+b> // storage
+
+null // no libraries
+<b b{0011} s, 3 roll ref, rot ref, swap dict, b> // create StateInit
+dup <s csr. cr cr cr cr
+dup ."StateInit: " <s csr. cr
+dup hashu wc swap 2dup 2constant wallet_addr
+file-base +".addr" save-address-verbose
+
+<b 
+  b{1000100} s, 
+  wallet_addr addr, 
+  b{000010} s, 
+  swap <s s, 
+  b{0} s, 
+  delegation-deadline 32 u, // delta to make deposit
+b>
+
+dup ."External message for initialization is " <s csr. cr
+
+2 boc+>B dup constant msg-boc cr
+file-base +"-query.boc" tuck B>file
+."(Saved money giver creating query to file " type .")" cr cr
+
+
+."new pool address = " wallet_addr .addr cr
+."Non-bounceable address (for init): " wallet_addr 7 .Addr cr
+."Bounceable address (for later access): " wallet_addr 6 .Addr cr cr
+
+msg-boc Bx. cr

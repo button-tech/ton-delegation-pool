@@ -1,0 +1,401 @@
+<app-navigation-tab></app-navigation-tab>
+<div class="container">
+    <div class="row">
+
+        <div class="card override ">
+            <div *ngIf="(this.data | async) && (this.data | async).maximumStake > 0" class="card-body">
+                <div class="text-center col-12 pt-4">
+                    <div class="pb-3"
+                         style="margin-top: -0.25em; font-size: 50px !important; padding-bottom: 0.3em !important; ">
+                        <mat-icon (click)="this.back()" class="icon">arrow_back</mat-icon>
+                        <h4
+                                style="color: #212325; margin-bottom: 1.5em; margin-top:1.4em;font-weight: bolder; font-size: 19px">
+                            Delegate Grams to Validator</h4></div>
+                </div>
+                <div style="margin-top: -2em" class="row pl-lg-3 pr-lg-3 p-sm-2">
+                    <div class="pt-lg-4 col-lg-4 col-xs-12 pl-lg-4 raise">
+                        <div class="row-container">
+                            <h4>{{(this.data | async)?.contractStatus}}️</h4>
+                            <p style="color: #99999A; margin-top: -1em; text-align: left">Pool status
+                                <mat-icon style="font-size: 12px" (click)="popoverDelegatedStatusAbout.toggle()"
+                                          [satPopoverAnchor]='popoverDelegatedStatusAbout'
+                                          (mouseenter)="popoverDelegatedStatusAbout.open();"
+                                          (mouseleave)="popoverDelegatedStatusAbout.close();">info
+                                </mat-icon>
+                            </p>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverDelegatedStatusAbout
+                                     horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Current status of delegation pool</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                    </div>
+
+                    <div class="text-center col-lg-4 col-xs-12 pt-1">
+                        <div class="row-container pt-lg-2 pt-xs-0">
+                            <h3 style="font-size: 20px !important;">{{(this.delegatedSum | async) || 0}}<strong
+                                    style="font-size: 24px"> 💎</strong></h3>
+                            <p style="color: #99999A; margin-top: -1em">Delegated
+                                <mat-icon style="font-size: 12px" (click)="popoverDelegatedAbout.toggle()"
+                                          [satPopoverAnchor]='popoverDelegatedAbout'
+                                          (mouseenter)="popoverDelegatedAbout.open();"
+                                          (mouseleave)="popoverDelegatedAbout.close();">info
+                                </mat-icon>
+                            </p>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverDelegatedAbout horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Amount of 💎 Grams that you have sent to the pool</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                    </div>
+
+                    <div *ngIf="(this.data | async)?.contractStatus === '✳️ Raising'"
+                         class="text-center amount pt-4 col-lg-4 col-xs-12">
+                        <form [formGroup]="angForm">
+                            <div class="form-group">
+                                <label class="pt-2 amam"
+                                       style="color: #3994D7; font-weight: bold; margin-top: 0.2em;  text-align: left"
+                                       [ngClass]="{'is-danger-two':angForm.controls['amount'].dirty &&  angForm.controls['amount'].errors?.required || (!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.balance !== null) || angForm.controls['amount'].touched && angForm.controls['amount'].value === null } ">
+                                    Amount
+                                    <strong
+                                            style="color: #858585; width: 275px !important; font-size: 12px; margin-left: 0.5em !important;"
+                                            [ngClass]="{'is-danger-two':angForm.controls['amount'].dirty &&  angForm.controls['amount'].errors?.required || (!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.balance !== null) || angForm.controls['amount'].touched && angForm.controls['amount'].value === null}">
+                                        {{ 'Balance: ' + ((this.upd.balanceOfWallet$ | async) || '...') + ' 💎'}}
+                                    </strong>
+                                    <input #amount (input)="this.calculateEstimated(amount.valueAsNumber)"
+                                           style="width: 260px"
+                                           type="number" min="0" step="0.000000001" placeholder="0.0"
+                                           class="form-control" formControlName="amount"
+                                           [ngClass]="{'is-danger':angForm.controls['amount'].dirty &&  angForm.controls['amount'].errors?.required || (!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.balance !== null) || angForm.controls['amount'].touched && angForm.controls['amount'].value === null}">
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                    <div *ngIf="(this.data | async)?.contractStatus !== '✳️ Raising'"
+                         class="text-center amount  col-lg-4 col-xs-12">
+                        <div class="pt-4" *ngIf="(this.data | async)?.contractStatus === '🔘 Setup'">
+                            <h4>Pool will be ready for delegating soon</h4>
+                            <p style="color: #99999A; margin-top: -1em">Description</p>
+                        </div>
+                        <div class="pt-4" *ngIf="(this.data | async)?.contractStatus === '👨‍❤️‍👨 Elections'">
+                            <h4>Waiting for elections results</h4>
+                            <p style="color: #99999A; margin-top: -1em">Description</p>
+                        </div>
+                        <div class="pt-4" *ngIf="(this.data | async)?.contractStatus === '🔴 Fail'">
+                            <h4>Our candidate lose the election unfortunately. Withdraw your funds</h4>
+                            <p style="color: #99999A; margin-top: -1em">Description</p>
+                        </div>
+                        <div class="pt-4" *ngIf="(this.data | async)?.contractStatus === '🕔 Waiting'">
+                            <h4>Your funds will be unfrozen soon. Please wait</h4>
+                            <p style="color: #99999A; margin-top: -1em">Description</p>
+                        </div>
+                        <div class="pt-4" *ngIf="(this.data | async)?.contractStatus === '💸 Withdraw'">
+                            <h4>Please, withdraw your funds with reward</h4>
+                            <p style="color: #99999A; margin-top: -1em">Description</p>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="(this.data | async)?.contractStatus === '✳️ Raising' " class="col-12 pt-2 pd-4">
+                    <div class="row pr-4 pl-4" *ngIf="!this.showLoader">
+                        <div class="col-7 p-0 text-left"><h5 class="mb-0 h55">Monthly
+                            earnings</h5><span style="font-size: 12px" class="d-block text-left text-muted">Estimated from current APY</span>
+                        </div>
+                        <div class="col-5 earnings p-0 text-right">
+                            <div class="success">
+                                <h5 class="h55">
+                                    <div><strong
+                                            style="font-weight: normal !important; color: inherit !important;">
+                                        💎 {{this.estimatedGrams | async}}</strong> Grams
+                                    </div>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 text-center pt-4 pb-4">
+                    <loaders-css *ngIf="this.showLoader" [loader]="loader" [scale]="1"
+                                 [bgColor]="bgColor" [color]="color"></loaders-css>
+                </div>
+
+                <div *ngIf="!this.showLoader"
+                     style="padding-right: 3em !important; padding-left: 2em !important;" class="row p-4 pt-0">
+                    <button
+                            *ngIf="(this.data | async).contractStatus === '✳️ Raising' || (this.data | async).contractStatus === '🔘 Setup'"
+                            [disabled]="(this.data | async).contractStatus !== '✳️ Raising'"
+                            class="btn btn-ton text-center col-12" (click)="delegate()">
+                        Delegate
+                    </button>
+                    <button *ngIf="(this.data | async)?.contractStatus !== '✳️ Raising'"
+                            [disabled]="!((this.data | async).contractStatus === '🔴 Fail' || (this.data | async).contractStatus === '💸 Withdraw')"
+                            class="btn btn-ton text-center col-12" (click)="withdraw()">
+                        Withdraw
+                    </button>
+                </div>
+                <div class="pr-4 pl-4">
+                    <div class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2 text-center"><span class="text-muted"> Contract address <mat-icon
+                                style="font-size:9px" (click)="popoverAddress.toggle()"
+                                [satPopoverAnchor]='popoverAddress'
+                                (mouseenter)="popoverAddress.open();"
+                                (mouseleave)="popoverAddress.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverAddress horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Address of delegation pool contract</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0 not-small">
+                            {{(this.data | async)?.contractAddress}}</p>
+                            <mat-icon  class="m-lg-4   mr-4"  (click)="openNewTab(this.contractAddress)"
+                                      (click)="link.toggle()"
+                                      [satPopoverAnchor]='link'
+                                      (mouseenter)="link.open();"
+                                      (mouseleave)="link.close();">link</mat-icon>
+                            <sat-popover [interactiveClose]="false" #link horizontalAlign="center"
+                                         openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                         verticalAlign="below">
+                                <div style="margin-left: 3em" class="row">
+                                    <div style="background: grey; color: white !important;" class="col-12">
+                                        <h6>See contract on explorer</h6>
+                                    </div>
+                                </div>
+                            </sat-popover>
+                            <mat-icon class="m-lg-4 ml-4" (click)="copyAddress(this.contractAddress); "
+                                      (click)="copyAd.toggle()"
+                                      [satPopoverAnchor]='copyAd'
+                                      (mouseenter)="copyAd.open();"
+                                      (mouseleave)="copyAd.close();  this.copyMessage='Copy to clipboard'">file_copy
+                            </mat-icon>
+                            <sat-popover [interactiveClose]="false" #copyAd horizontalAlign="center"
+                                         openTransition="250ms ease-out" closeTransition="250ms ease-in"
+                                         verticalAlign="below">
+                                <div style="margin-left: 3em" class="row">
+                                    <div style="background: grey; color: white !important;" class="col-12">
+                                        <h6>{{this.copyMessage}}</h6>
+                                    </div>
+                                </div>
+                            </sat-popover>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Availble to withdraw <mat-icon
+                                style="font-size:9px" (click)="popWithdraw.toggle()"
+                                [satPopoverAnchor]='popWithdraw'
+                                (mouseenter)="popWithdraw.open();"
+                                (mouseleave)="popWithdraw.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popWithdraw horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Amount of Grams that you will withdraw from contract</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">
+                            💎 {{((this.withDrawSum | async) / 1000000000) || 0}}
+                            Grams</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Minimum Amount <mat-icon
+                                style="font-size:9px" (click)="popoverMinAmount.toggle()"
+                                [satPopoverAnchor]='popoverMinAmount'
+                                (mouseenter)="popoverMinAmount.open();"
+                                (mouseleave)="popoverMinAmount.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverMinAmount horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Minimum amount of Grams that you can delegate to the contract</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">
+                            💎 {{(this.data | async)?.minimalStake / 1000000000}}
+                            Grams</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Maximum Amount <mat-icon
+                                style="font-size: 9px" (click)="popoverMaxAmount.toggle()"
+                                [satPopoverAnchor]='popoverMaxAmount'
+                                (mouseenter)="popoverMaxAmount.open();"
+                                (mouseleave)="popoverMaxAmount.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverMaxAmount horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Max amount of Grams that you can delegate to the contract</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">
+                            💎 {{(this.data | async)?.maximumStake / 1000000000}}
+                            Grams</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Current period end <mat-icon
+                                style="font-size: 9px" (click)="popoverLockTime.toggle()"
+                                [satPopoverAnchor]='popoverLockTime'
+                                (mouseenter)="popoverLockTime.open();"
+                                (mouseleave)="popoverLockTime.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverLockTime horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 5em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Amount of time when current status of contract will be changed</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p
+                                class="m-0">{{checkIfinished((this.data | async)?.raisingDeadline)}}
+                        </p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Lock Time <mat-icon
+                                style="font-size: 9px" (click)="popoverLockTime2.toggle()"
+                                [satPopoverAnchor]='popoverLockTime2'
+                                (mouseenter)="popoverLockTime2.open();"
+                                (mouseleave)="popoverLockTime2.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverLockTime2 horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 5em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Amount of days, when your funds will be unfrozen</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p
+                                class="m-0">{{checkCurrentDeadline((this.data | async)?.lockTime)}}</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Raising Amount <mat-icon
+                                style="font-size: 9px" (click)="popoverRaisingAmount.toggle()"
+                                [satPopoverAnchor]='popoverRaisingAmount'
+                                (mouseenter)="popoverRaisingAmount.open();"
+                                (mouseleave)="popoverRaisingAmount.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverRaisingAmount horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 4em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Minimum amount of Grams that is necessary to collect</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">
+                            💎 {{((this.data | async)?.raisingAmount) / 1000000000 }}
+                            Grams</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Raised Amount <mat-icon
+                                style="font-size: 9px" (click)="popoverRaisedAmount.toggle()"
+                                [satPopoverAnchor]='popoverRaisedAmount'
+                                (mouseenter)="popoverRaisedAmount.open();"
+                                (mouseleave)="popoverRaisedAmount.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverRaisedAmount horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 4em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Current amount of Grams that is already delegated on contract</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">
+                            💎 {{((this.data | async)?.raisedAmount) / 1000000000}}
+                            Grams</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Validators fee <mat-icon
+                                style="font-size: 9px" (click)="popoverValidatorsFee.toggle()"
+                                [satPopoverAnchor]='popoverValidatorsFee'
+                                (mouseenter)="popoverValidatorsFee.open();"
+                                (mouseleave)="popoverValidatorsFee.close();">info</mat-icon></span>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverValidatorsFee horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 4em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Amount of percents that Validator will take as commission fee for
+                                        running Validator's
+                                        node</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">{{(this.data | async)?.validatorFee}}
+                            %</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 0.5px solid #dbe3ea;" class="ml-0 mr-0 row row-container">
+                        <div class="col-auto mr-auto p-0 pt-2 pb-2"><span class="text-muted">Esimated APR <mat-icon
+                                style="font-size: 9px; padding-right: 4em" (click)="popoverEAPR.toggle()"
+                                [satPopoverAnchor]='popoverEAPR' (mouseenter)="popoverEAPR.open();"
+                                (mouseleave)="popoverEAPR.close();">info</mat-icon></span>
+                        </div>
+                        <div class="col-auto p-0 pt-2 pb-2"><p class="m-0">{{(this.data | async)?.estimatedApr}}
+                            %</p>
+                        </div>
+                        <sat-popover [interactiveClose]="false" #popoverEAPR horizontalAlign="center"
+                                     openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                                     verticalAlign="below">
+                            <div style="margin-left: 3em" class="row">
+                                <div style="background: grey; color: white !important;" class="col-12">
+                                    <h6>Estimated APR - Amount of % that you will earn in 12 months</h6>
+                                </div>
+                            </div>
+                        </sat-popover>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!((this.data | async) && (this.data | async).maximumStake > 0)" class="card-body">
+                <div class="text-center col-12 pt-4">
+                    <div class="pb-3"
+                         style="margin-top: -0.25em; font-size: 50px !important; padding-bottom: 0.3em !important; ">
+                        <mat-icon (click)="this.back()" class="icon">arrow_back</mat-icon>
+                        <h4
+                                style="color: #212325; margin-bottom: 1.5em; margin-top:1.4em;font-weight: bolder; font-size: 19px">
+                            Delegate Grams to Validator</h4>
+                    </div>
+                    <div style="margin-top: 3em; margin-bottom: 10em" class="text-center">
+                        <loaders-css class="pt-4 pb-4" [loader]="loader"
+                                     [scale]="3"
+                                     [bgColor]="bgColor" [color]="color"></loaders-css>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

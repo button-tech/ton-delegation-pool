@@ -1,0 +1,66 @@
+.override {
+  top: -65px;
+  position: relative;
+}
+
+@media only screen and (max-width: 991px) {
+  .raise {
+    display: flex; justify-content: center
+  }
+
+}
+@media only screen and (min-width: 991px) {
+  .amount {
+    display: flex;
+    flex-flow: row-reverse;
+  }
+}
+
+.h55 {
+  font-size: 14px !important;
+}
+
+@media only screen and (max-width: 991px) {
+  .amam {
+    width: 200px !important;
+    margin-right: 4em;
+    font-size: 14px !important;
+  }
+}
+@media only screen and (max-width: 488px) {
+  .not-small {
+    display: none;
+  }
+
+}
+
+@media only screen and (max-width: 432px) {
+  p {
+    font-size: 12px;
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  p {
+    font-size: 10px;
+  }
+}
+
+.icon:hover {
+  background: rgba(79, 79, 80, 0.1);
+  border-radius: 100px;
+}
+
+.icon:active {
+  background: rgba(210, 210, 213, 0.1);
+  border-radius: 100px;
+}
+
+.is-danger {
+  background: none !important;
+  border-bottom: 1px solid red ;
+};
+
+.is-danger-two {
+  color: red !important;
+};

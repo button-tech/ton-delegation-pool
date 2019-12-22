@@ -1,0 +1,91 @@
+.btn-ton {
+    background: #55AEE3 !important;
+    color: white !important;
+    box-shadow: none !important;
+    font-weight: bold !important;
+    margin: 0.5em !important;
+    width: 133px !important;
+    text-transform: capitalize !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    padding: 0.8em !important;
+}
+
+.btn-ton:hover {
+    background: #3e8ee0 !important;
+    color: white !important;
+}
+
+label {
+    font-size: 16px !important;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.card {
+    min-width: 320px !important;
+}
+
+
+.btn-ton-outline {
+    border: 1px solid #55AEE3 !important;
+    background: white !important;
+    color: #55AEE3 !important;
+    box-shadow: none !important;
+    font-weight: bold !important;
+    margin: 0.5em !important;
+}
+
+.btn-ton-outline:hover {
+    border: 1px solid #3e8ee0;
+    background: white !important;
+    color: #3e8ee0 !important;
+}
+
+.btn-ton-100 {
+    background: #55AEE3 !important;
+    color: white !important;
+    box-shadow: none !important;
+    font-weight: bold !important;
+    margin: 0.5em !important;
+}
+
+.btn-ton-101 {
+    background: #55AEE3 !important;
+    color: white !important;
+    box-shadow: none !important;
+    font-weight: bold !important;
+    margin: 0.5em !important;
+}
+
+.btn-ton-100 :hover {
+    background: #3e8ee0 !important;
+    color: white !important;
+}
+
+.btn-ton-outline-zero {
+    background: white !important;
+    color: #3994D7 !important;
+    box-shadow: none !important;
+    font-weight: bold !important;
+    margin: 0 !important;
+}

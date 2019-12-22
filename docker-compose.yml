@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  front:
+    container_name: front
+    image: buttonwallet/contest_front:localhost
+    ports:
+    - 80:80
+
+  api:
+    container_name: api
+    image: buttonwallet/contest_api
+    ports:
+    - 3000:3000
+    tty: true
+    links:
+    - mongo
+    environment:
+    - DB_URI=mongodb://contest:contest@mongo:27017
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME=contest
+    - MONGO_INITDB_ROOT_PASSWORD=contest
+    - MONGO_INITDB_DATABASE=admin
+    - MONGO_INITDB_COLLECTION=contest
+    ports:
+    - 27017:27017

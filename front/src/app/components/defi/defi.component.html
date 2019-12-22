@@ -1,0 +1,45 @@
+<app-navigation-tab (messageEvent)="receiveMessage($event)"></app-navigation-tab>
+<div *ngIf="!this.show" class="container">
+    <div class="row">
+
+            <div class="card override ">
+                <div class="card-body ">
+                    <div class="container">
+                        <div class="row text-center pt-4 pb-4 ml-0 mr-0 pl-0 pr-0">
+                            <div class="text-center col-12">
+                                <div  routerLink="/main" style="margin-top: -0.25em; font-size: 50px !important; padding-bottom: 0.3em !important; ">
+                                    <mat-icon  class="icon">arrow_back</mat-icon>
+                                </div>
+                                <div class="col-xs-12 col-lg-4 offset-lg-4 pl-2 pr-3 pt-2  pb-4 mb-xs-4"
+                                     style="display: grid; grid-template-columns: 1fr 4fr; grid-template-rows: 2fr 130px 55px; padding: 0.2em; column-gap:0em;  margin-top: 1em">
+                                    <div style="justify-self: center !important; align-self: center; font-size: 20px !important;">
+                                        <mat-icon style="font-size: 34px !important; color: #55AEE3">work
+                                        </mat-icon>
+                                    </div>
+                                    <div style="justify-self: start">
+                                        <div class="col-12">
+                                            <h3 align="left" style="font-weight: bold">Delegation</h3>
+                                            <h5 style="margin-top: -0.8em; color:  #99999A; font-weight: bolder; white-space:nowrap;
+">Delegate funds to pool</h5>
+                                        </div>
+                                    </div>
+                                    <div style="grid-row: 2; grid-column: 1/-1; margin-top: -0.2em; text-align: left; height: 55px !important">
+                                        Earn 💎 Grams by delegating them to Validator together with others. You will get
+                                        reward if Validator will be elected and will finish validating blocks
+                                        successfully
+                                    </div>
+                                    <div style="grid-row: 3; grid-column: 1/-1; margin-top: -0.5em; margin-left: -1.2em">
+                                        <button routerLink="/delegation"
+                                                class="btn btn-ton-101 col-lg-10 offset-lg-1 col-xs-12 pl-0 pr-4">Go to
+                                            Delegation
+                                            <mat-icon style="">arrow_right_alt</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,31 @@
+FROM node:latest AS front-builder
+RUN mkdir /app
+ADD ./front /app
+WORKDIR /app
+RUN npm install
+RUN npm install -g @angular/cli
+RUN ng build --prod --aot
+
+FROM golang:latest AS builder
+COPY --from=front-builder /app/dist /app/dist
+RUN mkdir /build
+ADD ./front/main.go /build
+WORKDIR /build
+RUN mkdir static
+RUN go get github.com/gin-gonic/gin
+RUN go get github.com/json-iterator/go
+RUN go get github.com/gin-gonic/contrib/cors
+RUN go get github.com/gin-gonic/contrib/static
+RUN CGO_ENABLED=0  go build -tags=jsoniter -a -installsuffix cgo -ldflags '-extldflags "-static"' -o  bin/main .
+RUN mv /app/dist static
+
+FROM alpine
+RUN apk update && apk add bash
+ENV GIN_MODE=release
+COPY --from=builder /build/bin /app
+COPY --from=builder /build/static /app
+WORKDIR /app
+
+EXPOSE 80
+
+ENTRYPOINT ["/app/main"]
