@@ -2,6 +2,7 @@
 
 Here you can find two versions of delegation pool contract
 `v3` - basic delegation_pool
+
 `v4` - delegation_pool with callbacks that allows to create sub-delegations pools and handle callbacks
 
 ## Installation
@@ -27,6 +28,8 @@ created new key 663DC5289A26B5E5C5184B223421666BBB4D0A91FF60D436A3FE95CDF5833F06
 > exportpub 663DC5289A26B5E5C5184B223421666BBB4D0A91FF60D436A3FE95CDF5833F06
 got public key: xrQTSFcIKv6kmV2cu2aFgo4SYW8nqPS0g16Ox+xie07EeFfR
 ```
+
+If you want to use `.sh` scripts you need to add full paths instead of `fift`, `func`, `sendfile`
 
 ## Deploy contract
 
