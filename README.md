@@ -20,7 +20,7 @@ docker-compose up
 
 We assume that anyone who is going to run this project from scratch is familiar with: C++, Python, Angular, JS, Fift, Func, Go Bash and Zsh as well as MongDB. To run from scracth you will need light client, that will be used by contracts and by api folder. Also you need to have npm installed to build frontend.
 
-To deploy smart contract go to: https://github.com/button-tech/ton-delegation-pool/contracts ]
+To deploy smart contract go to: https://github.com/button-tech/ton-delegation-pool/contracts 
 
 To run backend go to: https://github.com/button-tech/ton-delegation-pool/api
 
