@@ -13,7 +13,6 @@ import nest_asyncio
 nest_asyncio.apply()
 
 fift = "./liteclient-build/crypto/fift -I ./ton/crypto/fift/lib/"
-func = "./liteclient-build/crypto/func -o outputFileWithFiftAsm.fif ./ton/lite-client/crypto/smartcont/stdlib.fc"
 lite_client = "./liteclient-build/lite-client/lite-client"
 
 def mongo_connection(action):
@@ -27,13 +26,22 @@ def mongo_connection(action):
         return result
     return connect
 
+# todo: add statuses for:
+#  1. validator can withdraw the remaining amount
+#  2. someone should withdraw grams from elector contract to delegation pool contract
+#  3. elections failed and should withdraw staked amount
+
 statusWordList = {
     0: "🔘 Setup",
     1: "✳️ Raising",
     2: "🕔 Waiting",
     3: "🕔 Waiting",
     4: "🔴 Fail",
-    5: "💸 Withdraw"
+    5: "🕔 Waiting",
+    6: "🕔 Waiting",
+    7: "💸 Withdraw",
+    8: "💸 Withdraw",
+    14: "💸 Withdraw"
 }
 
 class Boc(BaseModel):
@@ -404,15 +412,25 @@ async def get_deadline(contract_address: str) -> list:
   remaining_time_to_deadline = asyncio.create_task(run_cli_method(contract_address + " remaining_time_to_deadline"))
   recorded_status = asyncio.create_task(run_cli_method(contract_address + " recorded_status"))
   get_config_15 = asyncio.create_task(cli_call("getconfig 15"))
+  get_config_34 = asyncio.create_task(cli_call("getconfig 34"))
+  get_config_32 = asyncio.create_task(cli_call("getconfig 32"))
+  get_validator_pub_key = asyncio.tasks(run_cli_method(contract_address + " validator_public_key"))
+
 
   await remaining_time_to_deadline
   await recorded_status
   await get_config_15
+  await get_config_32
+  await get_config_34
+  await get_validator_pub_key
+
+  validator_pub_key = hex(get_validator_pub_key.result()[0])[1:]
+
+  print(validator_pub_key)
 
   validators_elected_for = int(parse_stdout(get_config_15.result(), "validators_elected_for:", " elections_start_before"))
   stake_held_for = parse_stdout(get_config_15.result(), "stake_held_for:", "x{")
   stake_held_for = int(replace_multiple(stake_held_for, ["\n", " ", ")"], ""))
-
 
   deadline = int(recorded_status.result()[1])
   contract_status = int(recorded_status.result()[0])
@@ -428,25 +446,45 @@ async def get_deadline(contract_address: str) -> list:
     if abs(time_to_deadline) > validators_elected_for * 5:
       contract_status *= 2
 
-  if contract_status == 3 or contract_status == 4:
+  if contract_status == 4:
     deadline += 3600 * 24 * 30 * 2
     if abs(time_to_deadline) > 3600 * 24 * 30 * 2:
-      contract_status *= 2
+      contract_status += contract_status
 
-  if contract_status == 10:
+  if contract_status == 6:
+      if abs(time_to_deadline) < validators_elected_for:
+          curr_vset_34 = get_config_34.result()
+          result = curr_vset_34.find(validator_pub_key)
+          if result == -1:
+              contract_status = 5
+          return [contract_status, deadline, time_to_deadline, validators_elected_for, stake_held_for]
+
+      elif abs(time_to_deadline) < validators_elected_for * 2:
+          prev_vset_32 = get_config_32.result()
+          result = prev_vset_32.find(validator_pub_key)
+          if result == -1:
+              contract_status = 5
+          if abs(time_to_deadline) >= validators_elected_for + stake_held_for:
+              contract_status = 5
+          return [contract_status, deadline, time_to_deadline, validators_elected_for, stake_held_for]
+
+      else:
+          contract_status = 5
+
+  if contract_status == 8 or contract_status == 14:
     deadline = int("0xFFFFFFFF", 16)
 
   return [contract_status, deadline, time_to_deadline, validators_elected_for, stake_held_for]
 
-def parse_stdout(stdout: str, startPhrase: str, endPhrase: str="")-> str:
-    begin = stdout.find(startPhrase)
+def parse_stdout(stdout: str, start_phrase: str, end_phrase: str="")-> str:
+    begin = stdout.find(start_phrase)
     if begin == -1:
         return "error"
-    if endPhrase == "":
-        result = stdout[begin + len(startPhrase):]
+    if end_phrase == "":
+        result = stdout[begin + len(start_phrase):]
     else:
-        end = stdout.find(endPhrase)
-        result = stdout[begin + len(startPhrase):end]
+        end = stdout.find(end_phrase)
+        result = stdout[begin + len(start_phrase):end]
 
     return result
 
@@ -465,16 +503,12 @@ async def get_lock_time(contract_address: str) -> list:
       min = (validators_elected_for * 1) + remaining_time_to_deadline + 0 + 0
       max = (validators_elected_for * 5) + remaining_time_to_deadline + validators_elected_for + stake_held_for + 0
   elif contract_status == 3:
-      # max = remaining_time_to_deadline + validators_elected_for + stake_held_for + 0
-      # min = remaining_time_to_deadline
-      pass
+      max = remaining_time_to_deadline + validators_elected_for + stake_held_for + 0
+      min = remaining_time_to_deadline
   elif contract_status == 6:
       max = validators_elected_for + remaining_time_to_deadline + stake_held_for + 0
   elif contract_status == 4 or contract_status == 5 or contract_status >= 7:
       pass
-
-  # min = int(min / 86400)
-  # max = int(max / 86400)
 
   return [min, max]
 
