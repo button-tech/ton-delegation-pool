@@ -172,7 +172,7 @@ async def withdrawal(contract_address: str, address: str):
     if address_info.result() == "error":
          raise HTTPException(status_code=500, detail="bad address")
 
-    addressInt = int(address_info.result()["fullAddress"], 16)
+    address_int = int(address_info.result()["fullAddress"], 16)
     time = int(timeToWithdraw.result()[1])
     credits = credits_list_extended.result()
 
@@ -180,7 +180,7 @@ async def withdrawal(contract_address: str, address: str):
          return {"timeToWithdraw": time, "amount": 0}
 
     for i in range(len(credits)):
-       if credits[i] == str(addressInt):
+       if credits[i] == str(address_int):
          return {"timeToWithdraw": 0, "amount": int(credits[i + 1])}
 
     return {"timeToWithdraw": 0, "amount": 0}
@@ -211,7 +211,6 @@ async def contracts_list():
     for future in done:
         value = future.result()
         if value == "error":
-            # raise HTTPException(status_code=500, detail="error")
             continue
         result.append(value)
 
@@ -248,8 +247,7 @@ async def deposit_info(contract_addr: str, delegator_addr: str):
         credits = credits_list_extended.result()
         for i in range(len(delegators)):
             if delegators[i] == address:
-                # < 7
-                if contract_status < 5:
+                if contract_status < 7:
                           result = int(delegators[i-1])
                           break
                 for j in range(len(credits)):
@@ -414,7 +412,7 @@ async def get_deadline(contract_address: str) -> list:
   get_config_15 = asyncio.create_task(cli_call("getconfig 15"))
   get_config_34 = asyncio.create_task(cli_call("getconfig 34"))
   get_config_32 = asyncio.create_task(cli_call("getconfig 32"))
-  get_validator_pub_key = asyncio.tasks(run_cli_method(contract_address + " validator_public_key"))
+  get_validator_pub_key = asyncio.create_task(run_cli_method(contract_address + " validator_public_key"))
 
 
   await remaining_time_to_deadline
@@ -424,9 +422,7 @@ async def get_deadline(contract_address: str) -> list:
   await get_config_34
   await get_validator_pub_key
 
-  validator_pub_key = hex(get_validator_pub_key.result()[0])[1:]
-
-  print(validator_pub_key)
+  validator_pub_key = hex(int(get_validator_pub_key.result()[0]))[2:]
 
   validators_elected_for = int(parse_stdout(get_config_15.result(), "validators_elected_for:", " elections_start_before"))
   stake_held_for = parse_stdout(get_config_15.result(), "stake_held_for:", "x{")
