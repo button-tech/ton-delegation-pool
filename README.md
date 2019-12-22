@@ -58,11 +58,14 @@ If you have Validator Node - you can create Delegation Pool
 
 If you do not have it - you can delegate funds by going to Delegate 
 
-Each Delegation pool have multiple statuses for user
+Each Delegation pool have multiple statuses for user:
 
 ✳️ Raising - open to send funds on it. Later Validator will send funds to elector 
+
 🔴 Fail - If deadline will be exceeded or something went wrong. You can withdraw your funds
+
 🕔 Waiting - Wait for your funds to be unfrozen
+
 💸 Withdraw - Get your funds back with rewards
 
 We assume that the real commission fees will be significantly lower than right now
