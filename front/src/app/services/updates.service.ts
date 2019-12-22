@@ -190,8 +190,11 @@ export class UpdatesService {
     }
 
     checkOriginalPub( pubKey ) : Observable<boolean> {
-        const url = encodeURI(this.url + '/contractCheck/' + pubKey);
-        return this.http.get(url).pipe(
+        const url = this.url + '/contractCheck';
+        const body = {
+          'value': pubKey
+        };
+        return this.http.post(url, body).pipe(
             map(( x : any ) => {
                 return x.result;
             })
