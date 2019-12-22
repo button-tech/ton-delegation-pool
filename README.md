@@ -46,7 +46,7 @@ It is possible to deploy smart contract via WEB frontend only. We use our own ba
 
 Telegram: https://t.me/ton2Contest/2
 
-Local: Also is at docs folder
+Local: [GitHub](https://github.com/button-tech/ton-delegation-pool/raw/master/docs/Delegation_dapp.pdf)
 
 # Demo
 ### Try it [here](https://contest.buttonwallet.com) 
