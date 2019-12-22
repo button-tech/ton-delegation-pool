@@ -18,19 +18,19 @@ THE BEST WAY to run everything locally is use docker compose
 docker-compose up
 ```
 
-To deploy smart contract: go to /contracts Readme
+We assume that anyone who is going to run this project from scratch is familiar with: C++, Python, Angular, JS, Fift, Func, Go Bash and Zsh as well as MongDB. To run from scracth you will need light client, that will be used by contracts and by api folder. Also you need to have npm installed to build frontend.
+
+To deploy smart contract go to: https://github.com/button-tech/ton-delegation-pool/contracts ]
+
+To run backend go to: https://github.com/button-tech/ton-delegation-pool/api
+
+To run frontend go to: https://github.com/button-tech/ton-delegation-pool/front
 
 It is possible to deploy smart contract via WEB frontend only. We use our own backend wrappers over light client to send Boc and run some methods.
 
-To run backend go to /api 
-
-To run frontend go to /frontend
-
-
-
 # Video 
-### Interaction with production elector smart contract (from web + terminal)
-Will be soon
+### Interaction with production elector smart contract (from web)
+[![Alt text](https://img.youtube.com/vi/AKCNmtSnO6E/0.jpg)](https://www.youtube.com/watch?v=AKCNmtSnO6E)
 ### Interaction with production elector smart contract (from terminal) 
 [![Alt text](https://img.youtube.com/vi/gZh2N2zzxHg/0.jpg)](https://www.youtube.com/watch?v=gZh2N2zzxHg)
 ### Interaction with elector smart contract (mocked for fast tests)
