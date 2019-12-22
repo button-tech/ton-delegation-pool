@@ -4,7 +4,7 @@ ADD ./front /app
 WORKDIR /app
 RUN npm install
 RUN npm install -g @angular/cli
-RUN ng build --prod --aot
+RUN ng build
 
 FROM golang:latest AS builder
 COPY --from=front-builder /app/dist /app/dist
