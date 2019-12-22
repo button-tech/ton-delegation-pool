@@ -228,19 +228,21 @@ contain PROC:<{
 }>
 allow_withdrawal PROC:<{
   s2 POP
-  get_stake_conf CALLDICT
-  3 BLKDROP
+  get_validator_conf CALLDICT
+  NIP
+  NIP
   NOW
-  s2 s1 XCPU
+  s3 s2 XCPU
   ADD
-  s0 s1 PUXC
+  s0 s2 PUXC
   ADD
-  s2 s(-1) PUXC
+  s3 s(-1) PUXC
   GREATER
   IFJMP:<{
-    3 BLKDROP
+    4 BLKDROP
     TRUE
   }>
+  s2 s1 PUSH2
   GREATER
   IFJMP:<{
     32 PUSHINT
@@ -249,14 +251,21 @@ allow_withdrawal PROC:<{
     168 PUSHINT
     SDSKIPFIRST
     PLDDICT
-    SWAP
+    s0 s4 XCHG2
     contain CALLDICT
-    IF:<{
-      FALSE
-    }>ELSE<{
+    IFNOTJMP:<{
+      3 BLKDROP
       TRUE
     }>
+    ROT
+    ADD
+    GEQ
+    IFJMP:<{
+      TRUE
+    }>
+    FALSE
   }>
+  3 BLKDROP
   34 PUSHINT
   CONFIGOPTPARAM
   CTOS
