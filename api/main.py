@@ -53,6 +53,9 @@ class DataForAdd(BaseModel):
     delegationDeadlineDelta: int
     contractAddress: str
 
+class ValidatorPubKey(BaseModel):
+    value: str
+
 app = FastAPI()
 
 app.add_middleware(
@@ -286,9 +289,9 @@ async def add_gelegation_pool(data: DataForAdd):
 
     return {"result": "ok"}
 
-@app.get("/contractCheck/{validator_pub_key}")
-async def data_pool_check(validator_pub_key: str):
-    is_in_db = await get_single_contracts_info({"validatorPubKey": validator_pub_key})
+@app.post("/contractCheck")
+async def data_pool_check(validator_pub_key: ValidatorPubKey):
+    is_in_db = await get_single_contracts_info({"validatorPubKey": validator_pub_key.value})
     if is_in_db:
         return {"result": True}
     return {"result": False}
