@@ -5,6 +5,7 @@ new-testgiver-query.boc
 testgiver-query.boc
 random.fc
 .idea
+node_modules
 logs.txt
 # getMoney.fif
 outputFileWithFiftAsm.fc

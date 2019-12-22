@@ -1,0 +1,84 @@
+<div style="padding: 0 !important; margin: 0 !important;">
+    <div>
+        <div style="background: #212325; padding-bottom: 3em !important;" class="container-fluid pt-3">
+            <div class="row pr-3 pl-3">
+                <div style="display:flex; justify-content: space-between" class="col-12 text-center">
+                    <div (click)="update$()" style="">
+                        <mat-icon class="icon" style="color: #99999A">refresh</mat-icon>
+                    </div>
+                    <div style="color: #99999A; font-size: 13px !important; font-weight: bolder !important;">{{this.updated || 'updated just now'}}</div>
+                    <div [satPopoverAnchor]="more" (click)="more.toggle()"
+                         style="">
+                        <mat-icon class="icon" style="color: #99999A">more_vert
+                        </mat-icon>
+                    </div>
+                </div>
+                <sat-popover [interactiveClose]="true" #more horizontalAlign="start"
+                             openTransition="150ms ease-out" closeTransition="150ms ease-in"
+                             verticalAlign="below" hasBackdrop>
+                    <div style="background: white; border-radius: 5px;">
+                        <div routerLink="/message/private" class="col-12 ll pt-2 pb-1">
+                            <p style="color: black !important; font-weight: bolder">Get private key</p>
+                        </div>
+                        <div routerLink="/message/delete" class="col-12 ll pt-2 pb-1">
+                            <p style="color: black !important; font-weight: bolder">Delete account</p>
+                        </div>
+                    </div>
+                </sat-popover>
+                <div class="col-12 text-center pt-4 pb-4">
+                    <h4 *ngIf="(this.upd.balanceOfWallet$ | async)"
+                        [ngClass]="{'bal-h' : true}">{{(this.upd.balanceOfWallet$ | async) || '...'}} <strong
+                            style="font-size: 28px !important; margin-left: 0.25em;"> 💎</strong></h4>
+                    <h4 *ngIf="!(this.upd.balanceOfWallet$ | async)" [ngClass]="{'bal-h-2' : true}">Loading
+                        balances</h4>
+                    <p style="color: white !important; margin-top: -1em; padding-bottom: 1em; font-weight: bolder">Your
+                        balance</p>
+                    <button [disabled]="this.router.url === '/create'" class="btn btn-ton" (click)="this.showReceive = !this.showReceive; openModalReceive()">
+                        <mat-icon style="font-size: 16px !important; margin-top: -0.6em; font-weight: bold !important;">
+                            call_received
+                        </mat-icon>
+                        Receive
+                    </button>
+                    <button [disabled]="this.router.url === '/create'" class="btn btn-ton" (click)="this.showSend = !this.showSend; openModalSend()">
+                        <mat-icon style="font-size: 16px !important; margin-top: -0.6em; font-weight: bold !important;">
+                            call_made
+                        </mat-icon>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="modal-ll" *ngIf="showReceive" style="height: 1500px;  background: rgba(0,0,0,0.5) !important;">
+                <div class="container core">
+                    <div class="row">
+                        <div class="container">
+                            <div class="row">
+                                <div class="card override">
+                                    <div class="card-body">
+                                        <app-receive (messageEvent)="receiveMessageFromReceive($event)"></app-receive>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="showSend" class="modal-ll" style="height: 1500px;  background: rgba(0,0,0,0.5) !important;">
+            <div class="container core">
+                <div class="row">
+                    <div class="container">
+                        <div class="row">
+                            <div class="card override">
+                                <div class="card-body">
+                                    <app-send (messageEvent)="receiveMessageFromSend($event)"></app-send>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

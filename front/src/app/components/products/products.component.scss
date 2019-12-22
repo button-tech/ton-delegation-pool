@@ -1,0 +1,26 @@
+.override {
+  top: -65px;
+  position: relative;
+}
+
+.modal-ll {
+  padding-left: 2em;
+  padding-right: 2em;
+  margin-left: 2em;
+  margin-right: 2em;
+  margin-top: -14em;
+}
+
+.shadowed {
+  background: rgba(0,0,0,0.5);
+}
+
+.icon:hover {
+  background: rgba(79, 79, 80, 0.1);
+  border-radius: 100px;
+}
+
+.icon:active {
+  background: rgba(210, 210, 213, 0.1);
+  border-radius: 100px;
+}

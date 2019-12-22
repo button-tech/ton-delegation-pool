@@ -1,0 +1,154 @@
+<app-navigation-tab (messageEvent)="receiveMessage($event)"></app-navigation-tab>
+<div *ngIf="!this.show" class="container">
+    <div class="row">
+        <div class="card override ">
+            <div class="card-body ">
+                <div>
+                    <div class="text-center"
+                         style="margin-top: 0.24em; font-size: 50px !important; padding-bottom: 0.3em !important; ">
+                        <mat-icon (click)="this.location.back()" class="icon">arrow_back</mat-icon>
+                    </div>
+
+                </div>
+                <div class="container">
+                    <h4 class="pt-4" align="left"
+                        style="color: #212325; margin-top: -0.05em; margin-bottom: 0em; padding-bottom: 0;font-weight: bolder; font-size: 19px">
+                        Create a deligation pool</h4>
+                    <h5 class="" align="left" style="margin-top: -0.1em;
+                                               color: #99999A;
+                                               font-weight: bolder;">
+                        Delegation pool will be displayed on platform when it will be deployed
+                    </h5>
+                    <div class="row pt-0 pb-4 ml-0 mr-0 pl-0 pr-0">
+                        <form [formGroup]="angForm">
+                            <div class="row pb-4 pt-2">
+                                <div class="col-sm-12 col-lg-6 col-md-6 form-group">
+                                    <label [ngClass]="{'is-danger-two': angForm.controls['address'].errors?.required && angForm.controls['address'].dirty || angForm.controls['address'].dirty && !angForm.controls['address'].errors.age || angForm.controls['address'].touched && angForm.controls['address'].value === ''  }"
+                                           style="color: #3994D7; font-weight: bold; width: 260px;"> Enter
+                                        validator public key in base64 form
+                                        <textarea (change)="this.invalid = false" (input)="this.invalid = false"
+                                                [ngClass]="{'is-danger': angForm.controls['address'].errors?.required && angForm.controls['address'].dirty || angForm.controls['address'].dirty && !angForm.controls['address'].errors.age || angForm.controls['address'].touched && angForm.controls['address'].value === ''}"
+                                                #address style="width: 100% !important;" class="form-control" rows="3"
+                                                placeholder="Enter validator public key" spellcheck="false"
+                                                formControlName="address"></textarea>
+                                    </label>
+                                    <div *ngIf="angForm.controls['address'].invalid && (angForm.controls['address'].dirty || angForm.controls['address'].touched)"
+                                         style="color: red; font-weight: bolder">
+                                        <div *ngIf="angForm.controls['address'].errors.required">
+                                            ❌ Please, enter public key
+                                        </div>
+                                        <div
+                                                *ngIf="!angForm.controls['address'].errors.age && !angForm.controls['address'].errors.required">
+                                            ❌️ Public key is not correct
+                                        </div>
+                                    </div>
+                                    <div *ngIf="this.invalid &&  angForm.controls['address'].value.length == 48"  style="color: red; font-weight: bolder">
+                                        ℹ️ Public key was already used to deploy contract, please enter new one and resubmit
+                                    </div>
+                                </div>
+                                <div style="height: 140px; margin-top: -0.1em"
+                                     class="col-sm-12 col-lg-6 col-md-6 form-group">
+                                    <div style="height: 115px">
+                                        <label style="color: #3994D7; font-weight: bold; margin-top: 0.2em; width: 260px !important;"
+                                               [ngClass]="{'is-danger-two': angForm.controls['minimalStake'].value === null && (angForm.controls['minimalStake'].dirty) ||  (angForm.controls['minimalStake'].value <= 0  && (angForm.controls['minimalStake'].dirty))}">
+                                            Minimal Amount that will be possible to send to contract
+                                            <input [ngClass]="{'is-danger': angForm.controls['minimalStake'].value === null && (angForm.controls['minimalStake'].dirty) ||  (angForm.controls['minimalStake'].value <= 0  && (angForm.controls['minimalStake'].dirty))}"
+                                                   #minimalStake style="width: 260px" type="number" min="0"
+                                                   step="0.000000001"
+                                                   class="form-control"
+                                                   placeholder="0.0" formControlName="minimalStake">
+                                        </label>
+                                        <div *ngIf="angForm.controls['minimalStake'].invalid && (angForm.controls['minimalStake'].dirty || angForm.controls['minimalStake'].touched)"
+                                             style="color: red; font-weight: bolder">
+                                            <div *ngIf="angForm.controls['minimalStake'].errors.required || angForm.controls['minimalStake'].value == 0.0">
+                                                ❌ Please, enter amount
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="height: 140px;" class="col-sm-12 col-lg-6 col-md-6 form-group">
+                                    <div style="height: 115px">
+                                        <label style="color: #3994D7; font-weight: bold; margin-top: 0.2em; width: 260px !important;"
+                                               [ngClass]="{'is-danger-two': angForm.controls['raisingAmount']?.value === null && (angForm.controls['raisingAmount']?.dirty) ||  (angForm.controls['raisingAmount']?.value <= 0  && (angForm.controls['raisingAmount']?.dirty)) || ((angForm.controls['raisingAmount']?.dirty) && angForm.controls['raisingAmount']?.value <= 1001) }">
+
+                                            Amount that contract needs to raise
+                                            <input [ngClass]="{'is-danger': angForm.controls['raisingAmount']?.value === null && (angForm.controls['raisingAmount']?.dirty) ||  (angForm.controls['raisingAmount']?.value <= 0  && (angForm.controls['raisingAmount']?.dirty)) || ((angForm.controls['raisingAmount']?.dirty) && angForm.controls['raisingAmount']?.value <= 1001)}"
+
+                                                   #raisingAmount style="width: 260px" type="number" min="0"
+                                                   step="0.000000001"
+                                                   class="form-control"
+                                                   placeholder="0.0" formControlName="raisingAmount">
+                                        </label>
+                                        <div *ngIf="angForm.controls['raisingAmount'].invalid && (angForm.controls['raisingAmount'].dirty || angForm.controls['raisingAmount'].touched)"
+                                             style="color: red; font-weight: bolder">
+                                            <div *ngIf="angForm.controls['raisingAmount'].errors.required || angForm.controls['raisingAmount'].value == 0.0">
+                                                ❌ Please, enter amount
+                                            </div>
+                                            <div style="color: red"
+                                                 *ngIf="angForm.controls['raisingAmount'].value <= 10001 &&  angForm.controls['raisingAmount'].value != 0 &&  angForm.controls['raisingAmount'].value ">
+                                                ❌ Please, enter amount more than 10001 💎 Grams
+                                            </div>
+                                        </div>
+                                        <div style="color: red; font-weight: bolder"
+                                             *ngIf="angForm.controls['raisingAmount'].value === 0">
+                                            ❌ Please, enter amount
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div style="height: 140px;" class="col-sm-12 col-lg-6 col-md-6 form-group">
+                                    <div style="height: 115px">
+                                        <label style="color: #3994D7; font-weight: bold; margin-top: 0.2em; width: 260px !important;"
+                                               [ngClass]="{'is-danger-two': angForm.controls['delegationDeadlineDelta']?.value === null && (angForm.controls['delegationDeadlineDelta']?.dirty) ||  (angForm.controls['delegationDeadlineDelta']?.value <= 0  && (angForm.controls['delegationDeadlineDelta']?.dirty)) || ((angForm.controls['delegationDeadlineDelta']?.dirty) && !(angForm.controls['delegationDeadlineDelta']?.value >= 0.1)) }">
+                                            Period of raising (hours)
+                                            <input #delegationDeadlineDelta style="width: 260px" type="number" min="0"
+                                                   step="0.000000001"
+                                                   [ngClass]="{'is-danger': angForm.controls['delegationDeadlineDelta']?.value === null && (angForm.controls['delegationDeadlineDelta']?.dirty) ||  (angForm.controls['delegationDeadlineDelta']?.value <= 0  && (angForm.controls['delegationDeadlineDelta']?.dirty))  || ((angForm.controls['delegationDeadlineDelta']?.dirty) && !(angForm.controls['delegationDeadlineDelta']?.value >= 0.1)) }"
+                                                   class="form-control"
+                                                   placeholder="0.0" formControlName="delegationDeadlineDelta">
+                                        </label>
+                                        <div *ngIf="angForm.controls['delegationDeadlineDelta'].invalid && (angForm.controls['delegationDeadlineDelta'].dirty || angForm.controls['delegationDeadlineDelta'].touched)"
+                                             style="color: red; font-weight: bolder">
+                                            <div *ngIf="angForm.controls['delegationDeadlineDelta'].errors.required || angForm.controls['delegationDeadlineDelta'].value == 0.0 || angForm.controls['delegationDeadlineDelta'].value == 0">
+                                                ❌ Please, enter amount
+                                            </div>
+                                        </div>
+                                        <div style="color: red; font-weight: bolder"
+                                             *ngIf="(angForm.controls['delegationDeadlineDelta'].value < 0.1 && angForm.controls['delegationDeadlineDelta'].value > 0  ) && (angForm.controls['delegationDeadlineDelta'].dirty)">
+                                            ❌ Please, enter amount more than 0.1 hour
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center col-12">
+                                    <loaders-css *ngIf="this.showLoader" class="pt-4 pb-4" [loader]="loader"
+                                                 [scale]="1"
+                                                 [bgColor]="bgColor" [color]="color"></loaders-css>
+                                </div>
+                                <div *ngIf="!this.showLoader" class="btn-group col-12 p-0 m-0 text-center">
+                                    <button *ngIf=" (angForm.controls['delegationDeadlineDelta'].value >= 0.1 &&
+                                                       angForm.controls['raisingAmount'].value >= 10001 &&
+                                                       angForm.controls['minimalStake'].value  &&
+                                                       angForm.controls['address'].value  &&  angForm.controls['address'].value.length === 48  &&  angForm.controls['address']?.value[0] === 'x')"
+                                            (click)="createContract(minimalStake.valueAsNumber * 1000000000, raisingAmount.valueAsNumber * 1000000000, address.value, +((delegationDeadlineDelta.valueAsNumber* 60*60).toFixed(0)))"
+                                            class="btn btn-ton text-center col-12"
+                                            style="width: 100% !important;"
+                                            type="submit">Deploy contract
+                                    </button>
+                                    <button *ngIf="!(angForm.controls['delegationDeadlineDelta'].value >= 0.1 &&
+                                                       angForm.controls['raisingAmount'].value >= 10001 &&
+                                                       angForm.controls['minimalStake'].value &&
+                                                       angForm.controls['address'].value &&  angForm.controls['address'].value.length === 48  &&  angForm.controls['address']?.value[0] === 'x')"
+                                            [disabled]="true" class="btn btn-ton text-center col-12"
+                                            style="width: 100% !important;"
+                                            type="submit">
+                                        Deploy contract
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

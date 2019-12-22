@@ -1,0 +1,91 @@
+<div class="pb-4 pt-2">
+    <div class="col-12 p-0 m-0 pb-2">
+        <div class="d-inline-flex justify-content-between col-12 p-0">
+            <div><h4
+                    style="color: #212325; margin-top: -0.05em; margin-bottom: 1.5em; padding-bottom: 0;font-weight: bolder; font-size: 19px">
+                Send Grams </h4></div>
+            <div (click)="closeModal()" style="align-self: end; padding-top: 0.1em">
+                <mat-icon class="icon">close</mat-icon>
+            </div>
+        </div>
+        <hr style="margin-top: -1.5em !important;">
+    </div>
+    <form [formGroup]="angForm">
+        <div class="row pb-4 pt-2">
+            <div class="col-sm-12 col-lg-6 col-md-6 form-group">
+                <label
+                        [ngClass]="{'is-danger-two': angForm.controls['address'].errors?.required && angForm.controls['address'].dirty || angForm.controls['address'].dirty && !angForm.controls['address'].errors.age || angForm.controls['address'].touched && angForm.controls['address'].value === ''  }"
+                        style="color: #3994D7; font-weight: bold; width: 260px;"> Recipient wallet
+                    Address
+                    <textarea
+                            [ngClass]="{'is-danger': angForm.controls['address'].errors?.required && angForm.controls['address'].dirty || angForm.controls['address'].dirty && !angForm.controls['address'].errors.age || angForm.controls['address'].touched && angForm.controls['address'].value === ''}"
+                            #addr style="width: 100% !important;" class="form-control" rows="3"
+                            placeholder="Enter wallet address" spellcheck="false"
+                            formControlName="address"></textarea>
+                </label>
+                <div
+                        *ngIf="angForm.controls['address'].invalid && (angForm.controls['address'].dirty || angForm.controls['address'].touched)"
+                        style="color: red; font-weight: bolder">
+                    <div *ngIf="angForm.controls['address'].errors.required">
+                        ❌ Please, enter address
+                    </div>
+                    <div
+                            *ngIf="!angForm.controls['address'].errors.age && !angForm.controls['address'].errors.required">
+                        ❌️ Address is not correct
+                    </div>
+                </div>
+            </div>
+
+            <div style="height: 140px" class="col-sm-12 col-lg-6 col-md-6 form-group">
+                <div style="height: 115px">
+                    <label [ngClass]="{'is-danger-two':angForm.controls['amount'].dirty &&  angForm.controls['amount'].errors?.required || (!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.balance !== null) || angForm.controls['amount'].touched && angForm.controls['amount'].value === null } "
+                           style="color: #3994D7; font-weight: bold; margin-top: 0.2em; width: 260px !important;">
+                        Amount
+                        <strong style="color: #858585; width: 275px !important; font-size: 12px; margin-left: 0.5em !important;"
+                                [ngClass]="{'is-danger-two': angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.required || (!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.balance !== null) || angForm.controls['amount'].touched && angForm.controls['amount'].value === null} ">{{ 'Balance: ' + ((this.upd.balanceOfWallet$ | async) || '...') + ' 💎'}}</strong>
+                        <input [ngClass]="{'is-danger':angForm.controls['amount'].dirty &&  angForm.controls['amount'].errors?.required || (!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].errors?.balance !== null) || angForm.controls['amount'].touched && angForm.controls['amount'].value === null} "
+                               #amount style="width: 260px" type="number" min="0" step="0.000000001"
+                               class="form-control"
+                               placeholder="0.0" formControlName="amount">
+                    </label>
+                    <div style="font-weight: bolder; color: #3994D7"
+                         *ngIf="!angForm.controls['amount'].errors?.balance && angForm.controls['amount'].dirty && angForm.controls['amount'].value > 0 && angForm.controls['amount'].errors?.balance !== false">
+                        🏃‍♀️ Checking your balance ...
+                    </div>
+                    <div *ngIf="angForm.controls['amount'].invalid && (angForm.controls['amount'].dirty || angForm.controls['amount'].touched)"
+                         style="color: red; font-weight: bolder">
+                        <div *ngIf="angForm.controls['amount'].errors.required || angForm.controls['amount'].value == 0.0">
+                            ❌ Please, enter amount
+                        </div>
+                        <div *ngIf="!angForm.controls['amount'].errors.balance && angForm.controls['amount'].value">
+                            ❌ Balance is lower than current amount
+                        </div>
+                    </div>
+                    <br *ngIf="!angForm.controls['amount'].dirty">
+                    <label><input #comment style="width: 260px" type="text" class="form-control"
+                                  placeholder="comment (optional)" formControlName="comment">
+                    </label>
+                </div>
+            </div>
+            <div class="text-center col-12">
+                <loaders-css *ngIf="this.showLoader" class="pt-4 pb-4" [loader]="loader" [scale]="1"
+                             [bgColor]="bgColor" [color]="color"></loaders-css>
+            </div>
+            <div *ngIf="!this.showLoader" class="btn-group col-12 p-0 m-0 text-center">
+                <button *ngIf="amount.valueAsNumber > 0 && addr.value != '' && angForm.controls['address'].errors.age && (!angForm.controls['amount'].errors || angForm.controls['amount'].errors.balance)"
+                        class="btn btn-ton text-center col-12"
+                        style="width: 100% !important;"
+                        (click)="sendTransaction(addr.value, amount.valueAsNumber)" type="submit">
+                    SEND  {{amount.valueAsNumber || ''}} Grams
+                </button>
+                <button *ngIf="!(amount.valueAsNumber > 0 && addr.value != '' && angForm.controls['address'].errors.age && (!angForm.controls['amount'].errors || angForm.controls['amount'].errors.balance))"
+                        [disabled]="true" class="btn btn-ton text-center col-12"
+                        style="width: 100% !important;"
+                        (click)="sendTransaction(addr.value, amount.valueAsNumber)" type="submit">
+                    Send  {{amount.valueAsNumber || ''}} Grams
+                </button>
+            </div>
+        </div>
+    </form>
+
+</div>

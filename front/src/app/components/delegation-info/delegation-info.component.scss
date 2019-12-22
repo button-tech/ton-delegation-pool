@@ -1,0 +1,37 @@
+.override {
+  top: -65px;
+  position: relative;
+}
+
+.section {
+  background: #f1f2f3;
+  padding: 10px 10px;
+  color: #99999A;
+  font-size: 15px;
+  font-weight: bolder;
+}
+
+.ll:hover{
+  background: #f9fafb;
+}
+
+@media screen and (max-width: 990px) {
+  .addrsr {
+    display: none !important;
+  }
+  .pad-lft {
+    padding-left: 3.5em;
+  }
+  .big {
+    display: none;
+  }
+
+}
+
+@media screen and (min-width: 990px) {
+  .small {
+    display: none;
+  }
+}
+
+

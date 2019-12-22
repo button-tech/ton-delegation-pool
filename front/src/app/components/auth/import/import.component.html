@@ -1,0 +1,51 @@
+<div style="display: flex;
+     flex-direction:column;
+     align-items: center;
+     height: 100%;
+     justify-content: center;
+     background:  #000000 !important;">
+  <div class="row">
+    <div class="container" style="margin-top: -2em">
+      <div class="card p-2">
+        <div class="card-body">
+          <div [formGroup]="importGroup"
+               class="form-group"
+               style="height: 150px">
+            <label [ngClass]="{'is-danger-two': importGroup.controls['private_key'].errors?.required &&
+                              importGroup.controls['private_key'].dirty}"
+              style="color: #3994D7;
+                          font-weight: bold;
+                          width: 320px;">
+              Import private key
+              <textarea #private_key
+                        placeholder="Private key"
+                        style="width: 320px !important;"
+                        class="form-control pt-4"
+                        rows="3" spellcheck="false"
+                        formControlName="private_key"
+                        [ngClass]="{'is-danger': importGroup.controls['private_key'].errors?.required &&
+                                    importGroup.controls['private_key'].dirty}">
+              </textarea>
+            </label>
+            <div *ngIf="(importGroup.controls['private_key'].errors?.required &&
+                        importGroup.controls['private_key'].dirty)"
+                 style="color: red;
+                 font-weight: bolder">
+              <div *ngIf="importGroup.controls['private_key'].errors?.required &&
+                          importGroup.controls['private_key'].dirty">
+                ❌ Please, enter address
+              </div>
+            </div>
+          </div>
+            <button class="btn btn-ton-100 col-12"
+                    [disabled]="importGroup.controls['private_key'].errors?.required"
+                    (click)="tryImport(private_key.value)">import
+            </button>
+          <button class="btn btn-ton-outline col-12"
+                  style="border: 0.5px solid"
+                  routerLink="/auth">Back
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>

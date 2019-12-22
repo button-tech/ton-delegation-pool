@@ -1,0 +1,52 @@
+.icon:hover {
+  background: rgba(79, 79, 80, 0.1);
+  border-radius: 100px;
+}
+
+.icon:active {
+  background: rgba(210, 210, 213, 0.1);
+  border-radius: 100px;
+}
+
+.ll:hover {
+  background: #f0f1f2;
+  border-radius: 5px;
+}
+
+@media screen and (min-width: 990px) {
+  .core {
+    padding-left: 12em !important;
+    padding-right: 12em !important;
+    padding-bottom: 12em !important;
+    margin-top: -1em;
+  }
+}
+
+.modal-ll {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: -17.5em;
+  padding: 4em 1em 0;
+}
+
+.shadowed {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.bal-h {
+  color: white;
+  font-weight: bold;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.bal-h::first-letter {
+  font-size: 28px !important;
+}
+
+.bal-h-2 {
+  color: white;
+  font-weight: bold;
+  font-weight: bold;
+  font-size: 22px;
+}
