@@ -67,7 +67,7 @@ export class AddComponent implements OnInit {
     }
 
     createContract( minimalStake, raisingAmount, validatorPubKey, delegationDeadlineDelta ) {
-        this.upd.checkInitted(validatorPubKey).pipe(
+        this.upd.checkOriginalPub(validatorPubKey).pipe(
             map((resp) => {
                 this.invalid = resp;
                 if(!resp) {
