@@ -1,7 +1,7 @@
 #!/usr/bin/fift -s
 "TonUtil.fif" include
 
-{ ."usage: " @' $0 type ." <wallet-addr> <elect-utime> <max-factor> <adnl-addr>" cr
+{ ."usage: " @' $0 type ." <wallet-addr> <elect-utime> <max-factor> [adnl-addr]" cr
   ."Creates a request to participate in validator elections starting at <elect-utime> on behalf of smart-contract with address <wallet-addr> (prefix with '@' to load address from file) and hexadecimal adnl address <adnl-addr> (empty string or '0' for none)." cr
   ."The result is saved into <savefile> and output in hexadecimal form, to be signed later by the validator public key" cr 1 halt
 } : usage
