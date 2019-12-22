@@ -1,9 +1,10 @@
 # TON Delegation Pool platform
-## Answers on Telegram Contest Key points
-#### Describes your project and how users will interact with it 
-
 ![Image of Pool](https://github.com/button-tech/ton-delegation-pool/raw/master/docs/delegation.png)
 
+
+## Answers on Telegram Contest Key points
+
+#### Describes your project and how users will interact with it 
 
 This project allows anyone to create delegation pool and become validator. Also it allows anyone to earn interest by delegating Grams to potential Validators. (Risks will be handled by reputation system and security deposits). It is non-custodial solution, it is web based solution (all private keys and operations with it are on client side). 
  It is WEB platform features like:
