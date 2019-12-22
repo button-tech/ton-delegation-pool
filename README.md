@@ -50,7 +50,22 @@ Local: [GitHub](https://github.com/button-tech/ton-delegation-pool/raw/master/do
 
 # Demo
 ### Try it [here](https://contest.buttonwallet.com) 
+ 
+1. Create account, use short address and send funds on it
+2. Go to Defi => Delegation 
 
+If you have Validator Node - you can create Delegation Pool 
+
+If you do not have it - you can delegate funds by going to Delegate 
+
+Each Delegation pool have multiple statuses for user
+
+✳️ Raising - open to send funds on it. Later Validator will send funds to elector 
+🔴 Fail - If deadline will be exceeded or something went wrong. You can withdraw your funds
+🕔 Waiting - Wait for your funds to be unfrozen
+💸 Withdraw - Get your funds back with rewards
+
+We assume that the real commission fees will be significantly lower than right now
 
 # Run and Build
 
