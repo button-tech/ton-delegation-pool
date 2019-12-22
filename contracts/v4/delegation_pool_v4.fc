@@ -127,7 +127,7 @@ int contain(cell dict, int validator_public_key) {
 }
 
 (int) allow_withdrawal(int contract_status, int deadline, int validator_public_key) {
-    var (validators_elected_for, _, _, _) = get_stake_conf();
+    var (validators_elected_for, _, _, stake_held_for) = get_validator_conf();
 
     var current_time = now();
     var cur_vset_deadline = deadline + validators_elected_for;
@@ -135,7 +135,7 @@ int contain(cell dict, int validator_public_key) {
 
     if (current_time > prev_vset_deadline) {
         ;; assumption
-        ;; if stake_held_for > validation_close * 2 than allow to try to withraw
+        ;; if stake_held_for > validation_close than allow to try to withraw
         return true;
     }
 
@@ -143,7 +143,14 @@ int contain(cell dict, int validator_public_key) {
         var prev_vset = config_param(32); ;; previous validator set
 
         var validators = prev_vset.begin_parse().skip_bits(8 + 32 + 32 + 16 + 16 + 64).preload_dict();
-        return validators.contain(validator_public_key) ? false : true;
+        var ok = validators.contain(validator_public_key);
+        ifnot (ok) {
+            return true;
+        }
+        if (current_time >= cur_vset_deadline + stake_held_for) {
+            return true;
+        }
+        return false;
     }
 
     var cur_vset = config_param(34); ;; current validator set
