@@ -53,6 +53,9 @@ class DataForAdd(BaseModel):
     delegationDeadlineDelta: int
     contractAddress: str
 
+class ValidatorPubKey(BaseModel):
+    value: str
+
 app = FastAPI()
 
 app.add_middleware(
@@ -259,7 +262,7 @@ async def create_delegations_pool(data: DataForCreate):
      if len(result) != 2:
          raise HTTPException(status_code=500, detail="error")
 
-     info = {"contractAddress":result[0], "hexBoc": result[1] }
+     info = {"contractAddress" :result[0], "hexBoc": result[1] }
 
      _ = await asyncio.create_task(create_and_send_boc(info["hexBoc"]))
 
@@ -286,9 +289,9 @@ async def add_gelegation_pool(data: DataForAdd):
 
     return {"result": "ok"}
 
-@app.get("/contractCheck/{validator_pub_key}")
-async def data_pool_check(validator_pub_key: str):
-    is_in_db = await get_single_contracts_info({"validatorPubKey": validator_pub_key})
+@app.post("/contractCheck")
+async def data_pool_check(validator_pub_key: ValidatorPubKey):
+    is_in_db = await get_single_contracts_info({"validatorPubKey": validator_pub_key.value})
     if is_in_db:
         return {"result": True}
     return {"result": False}
