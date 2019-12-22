@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  url: 'https://ton.buttonwallet.com'
+  url: 'http://127.0.0.1:3000'
   // url: 'http://35.204.61.166'
 };
 

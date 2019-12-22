@@ -189,11 +189,11 @@ export class UpdatesService {
         );
     }
 
-    checkOriginalPub( pubKey ) : Observable<number> {
-        const url = this.url + '/contractCheck/' + pubKey;
+    checkOriginalPub( pubKey ) : Observable<boolean> {
+        const url = encodeURI(this.url + '/contractCheck/' + pubKey);
         return this.http.get(url).pipe(
             map(( x : any ) => {
-                return x;
+                return x.result;
             })
         );
 
@@ -202,7 +202,7 @@ export class UpdatesService {
 
 
     deployNewContract( contract : any ) : Observable<IContractPoolResponse> {
-        const url = this.url + '​/createDelegationPool';
+        const url = this.url + '/createDelegationPool';
         return this.http.post(url, contract).pipe(
             map(( response : IContractPoolResponse ) => response)
         );
@@ -222,7 +222,7 @@ export class UpdatesService {
     }
 
     successDeployementPing( body : IFinalRequest ) : Observable<boolean> {
-        const url = this.url + '​/addDelegationPool';
+        const url = this.url + '/addDelegationPool';
         return this.http.post(url, JSON.stringify(body)).pipe(
             map(( resp : any ) => {
                 if (resp && resp.result) {
