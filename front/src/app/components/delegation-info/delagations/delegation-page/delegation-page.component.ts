@@ -138,7 +138,7 @@ export class DelegationPageComponent implements OnInit {
 
     async withdraw() {
         await this.toggleLoader();
-        await (window as any).send(this.storage.getDataOfAccount().privateKey, this.contractAddress, 0.2, '-1', 'withdraw');
+        await (window as any).send(this.storage.getDataOfAccount().privateKey, this.contractAddress, 1, '-1', 'withdraw');
         await this.sleep(5000);
         await this.toggleLoader();
     }
