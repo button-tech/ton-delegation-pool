@@ -35,9 +35,17 @@ It is possible to deploy smart contract via WEB frontend only. We use our own ba
 
 # Video 
 ### Interaction with production elector smart contract (from web)
+**Deposits and stake to elect**
+
 [![Alt text](https://img.youtube.com/vi/AKCNmtSnO6E/0.jpg)](https://www.youtube.com/watch?v=AKCNmtSnO6E)
+
+**Recover stake and withdrawals**
+
+[![Alt text](https://img.youtube.com/vi/5a4wN8XpcMI/0.jpg)](https://www.youtube.com/watch?v=5a4wN8XpcMI)
+
 ### Interaction with production elector smart contract (from terminal) 
 [![Alt text](https://img.youtube.com/vi/gZh2N2zzxHg/0.jpg)](https://www.youtube.com/watch?v=gZh2N2zzxHg)
+
 ### Interaction with elector smart contract (mocked for fast tests)
 [![Alt text](https://img.youtube.com/vi/y9RfvadfX2c/0.jpg)](https://www.youtube.com/watch?v=y9RfvadfX2c)
 
