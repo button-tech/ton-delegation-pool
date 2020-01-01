@@ -1,4 +1,4 @@
-# TON Delegation Pool platform 
+# TON Delegation Pool Platform 
 [Try here](https://contest.buttonwallet.com)
 ![Image of Pool](https://github.com/button-tech/ton-delegation-pool/raw/master/docs/delegation.png)
 
