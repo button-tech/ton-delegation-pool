@@ -226,6 +226,7 @@ _ ~update_status(ds) {
 
     var public_key = cs~load_uint(256);
     var contract_address = cs~load_uint(256); 
+    var (_, src_addr) = parse_std_addr(s_addr);
     ;; protect from previous states (last smart contracts)
     if (contract_address != my_addr) {
         return send_message_back(s_addr, 0xfffffffe, query_id, op, 0, 64);
