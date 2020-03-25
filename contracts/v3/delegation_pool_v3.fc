@@ -196,6 +196,7 @@ _ ~update_status(ds) {
     var validator_public_key = ds~load_uint(256);
 
     var (_, my_addr) = my_address().parse_std_addr();
+    var (_, src_addr) = parse_std_addr(s_addr);
 
     var public_key = cs~load_uint(256);
     var contract_address = cs~load_uint(256); 
@@ -206,6 +207,8 @@ _ ~update_status(ds) {
     throw_unless(205, check_data_signature(begin_cell()
       .store_uint(public_key, 256)
       .store_uint(contract_address, 256)
+      .store_grams(amount)
+      .store_uint(src_addr, 256)
     .end_cell().begin_parse(), signature, validator_public_key));
 
     accept_message();

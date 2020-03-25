@@ -13,7 +13,14 @@ $1 base64>B dup Blen 36 <> abort"validator Ed25519 public key must be exactly 36
   32 B>u@+ 0xC6B41348 <> abort"invalid Ed25519 public key: unknown magic number"
   constant pubkey
 $2 bounce parse-load-address =: bounce 2=: contract_address
+$3 (number) =: amount
+$4 bounce parse-load-address =: bounce 2=: my_address
 
-pubkey contract_address swap drop 256 u>B B+ constant to_sign
+<b
+  pubkey B,
+  contract_address swap drop 256 u,
+  amount Gram,
+  my_address swap drop 256 u,
+b> boc>B constant to_sign
 
 to_sign Bx. cr

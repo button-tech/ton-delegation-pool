@@ -236,6 +236,8 @@ _ ~update_status(ds) {
     ifnot(check_data_signature(begin_cell()
         .store_uint(public_key, 256)
         .store_uint(contract_address, 256)
+        .store_grams(amount)
+        .store_uint(src_addr, 256)
         .end_cell().begin_parse(), signature, validator_public_key)) 
     {
         return send_message_back(s_addr, 0xfffffffe, query_id, op, 0, 64);
