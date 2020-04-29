@@ -427,6 +427,7 @@ _ ~update_status(ds) {
 
     var (total_stake, validator_public_key, delegators) = ds~load_data();
 
+    msg_value -= 1000000000; ;; deduct GR$1 for fees
     throw_if(140, msg_value <= 0); ;; for tests 0. for production testnet should be replaced with minimal stake amount for delegators min_stake.
 
     var (_, max_stake, _, _) = get_stake_conf();    
